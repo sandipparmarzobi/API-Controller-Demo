@@ -1,6 +1,7 @@
 using ApplicationLayer.Interface;
 using ApplicationLayer.Services;
 using DomainLayer.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using URF.Core.Abstractions;
 
@@ -10,13 +11,19 @@ namespace NewDemoProject.Controllers
     [Route("[controller]")]
     public class LoginController : ControllerBase
     {
+        public SignInManager<ApplicationUser> _signInManager { get; set; }
+        public UserManager<ApplicationUser> _userManager { get; set; }
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserService _userService;
 
-        public LoginController(IUnitOfWork unitOfWork, IUserService userService)
+        public LoginController(IUnitOfWork unitOfWork, IUserService userService,
+            SignInManager<ApplicationUser> signInManager,
+            UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _userService = userService;
+            _signInManager = signInManager;
+            _userManager = userManager;
         }
 
         [HttpPost]
@@ -29,9 +36,18 @@ namespace NewDemoProject.Controllers
                 {
                     return BadRequest("User not found");
                 }
-               _userService.Insert(user);
-               await _unitOfWork.SaveChangesAsync();
-            }
+                var appUser = new ApplicationUser
+                {
+                    UserName= user.Username,
+                    Password = user.Password,
+                    PasswordHash = user.Password,
+                    FirstName =user.Username,
+                    SecondName=user.Username,
+                };
+
+               await _userManager.CreateAsync(appUser);
+               //await _unitOfWork.SaveChangesAsync();
+                }
             catch (Exception ex) 
             {
                 return BadRequest(ex.Message);

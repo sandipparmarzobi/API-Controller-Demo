@@ -26,8 +26,10 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(option=> option.SignIn.RequireConfirmedAccount=true).AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<MyDemoDBContext>().AddDefaultTokenProviders();
+
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
