@@ -27,8 +27,8 @@ namespace NewDemoProject.Controllers
         }
 
         [HttpPost]
-        [Route("InsertUser")]
-        public async Task<IActionResult> InsertUser([FromBody] User user)
+        [Route("RegisterUser")]
+        public async Task<IActionResult> RegisterUser([FromBody] User user)
         {
             try
             {
@@ -38,16 +38,17 @@ namespace NewDemoProject.Controllers
                 }
                 var appUser = new ApplicationUser
                 {
-                    UserName= user.Username,
+                    UserName = user.Username,
                     Password = user.Password,
                     PasswordHash = user.Password,
-                    FirstName =user.Username,
-                    SecondName=user.Username,
+                    FirstName = user.Username,
+                    SecondName = user.Username,
+                    Email = user.Email
                 };
 
-               await _userManager.CreateAsync(appUser);
+               await _userManager.CreateAsync(appUser,user.Password);
                //await _unitOfWork.SaveChangesAsync();
-                }
+             }
             catch (Exception ex) 
             {
                 return BadRequest(ex.Message);
@@ -56,10 +57,10 @@ namespace NewDemoProject.Controllers
         }
 
         [HttpGet]
-        [Route("GetUser")]
-        public IActionResult GetUser(Guid id)
+        [Route("GetUserById")]
+        public IActionResult GetUserById(string id)
         {
-            var user = _userService.GetById(id);
+            var user = _userManager.FindByIdAsync(id);
             if (user == null)
             {
                 return NotFound();
@@ -72,7 +73,7 @@ namespace NewDemoProject.Controllers
         [Route("GetUserByName")]
         public IActionResult GetUserByName(string name)
         {
-            var user = _userService.GetByName(name);
+            var user = _userManager.FindByNameAsync(name);
             if (user == null)
             {
                 return NotFound();
