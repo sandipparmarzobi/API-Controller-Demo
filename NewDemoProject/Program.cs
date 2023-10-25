@@ -31,39 +31,29 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+//For User and Role 
 builder.Services.AddIdentity<ApplicationUser,ApplicationRole>(option => option.SignIn.RequireConfirmedAccount = false)
                 .AddEntityFrameworkStores<MyDemoDBContext>().AddDefaultTokenProviders();
-
-//builder.Services.AddAuthorization(options =>
-//{
-//    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
-//    options.AddPolicy("UserPolicy", policy => policy.RequireRole("User"));
-//});
-
-//builder.Services.AddDefaultIdentity<ApplicationUser>()
-//    .AddRoles<ApplicationRole>()
-//    .AddEntityFrameworkStores<MyDemoDBContext>();
-
-//builder.Services.AddScoped<RoleManager<ApplicationRole>, RoleManager>();
-
+// JWT Token Service
 builder.Services.AddAuthentication(cfg =>
 {
     cfg.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     cfg.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-    .AddJwtBearer(cfg =>
+.AddJwtBearer(cfg =>
+{
+    cfg.TokenValidationParameters = new TokenValidationParameters()
     {
-        cfg.TokenValidationParameters = new TokenValidationParameters()
-        {
-            ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
-            ValidateAudience = true,
-            ValidAudience = builder.Configuration["JWT:ValidAudience"],
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"])),
-        };
-    });
-
+        ValidateIssuer = true,
+        ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
+        ValidateAudience = true,
+        ValidAudience = builder.Configuration["JWT:ValidAudience"],
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"])),
+    };
+});
+// For Swagger Authorize button
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });

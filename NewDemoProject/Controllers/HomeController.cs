@@ -17,24 +17,19 @@ namespace API_Controller_Demo.Controllers
         public SignInManager<ApplicationUser> _signInManager { get; set; }
         public UserManager<ApplicationUser> _userManager { get; set; }
         public RoleManager<ApplicationRole> _roleManager { get; }
-        private readonly IConfiguration _configuration;
-        private readonly MyDemoDBContext _context;
 
-        public HomeController(IUserService userService,
-            SignInManager<ApplicationUser> signInManager,
-            UserManager<ApplicationUser> userManager, IConfiguration configuration, RoleManager<ApplicationRole> roleManager, MyDemoDBContext context)
+        public HomeController(SignInManager<ApplicationUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            RoleManager<ApplicationRole> roleManager)
         {
             _signInManager = signInManager;
             _userManager = userManager;
-            _configuration = configuration;
             _roleManager = roleManager;
-            _context = context;
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [Route("CreateRole")]
-        //[Authorize(Policy = "AdminPolicy")]
         public async Task<IActionResult> CreateRole([FromBody] string roleName)
         {
             if (!await _roleManager.RoleExistsAsync(roleName))
@@ -55,7 +50,6 @@ namespace API_Controller_Demo.Controllers
         [Authorize(Roles = "User, Admin")]
         [HttpGet]
         [Route("GetUserById")]
-        //[Authorize(Policy = "UserPolicy, AdminPolicy")]
         public async Task<IActionResult> GetUserById(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
@@ -69,7 +63,6 @@ namespace API_Controller_Demo.Controllers
         [Authorize(Roles = "User")]
         [HttpGet]
         [Route("GetUserByName")]
-        //[Authorize(Policy = "UserPolicy, AdminPolicy")]
         public async Task<IActionResult> GetUserByName(string name)
         {
             var user = await _userManager.FindByNameAsync(name);

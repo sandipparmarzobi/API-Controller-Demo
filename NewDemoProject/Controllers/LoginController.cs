@@ -24,12 +24,16 @@ namespace NewDemoProject.Controllers
         public SignInManager<ApplicationUser> _signInManager { get; set; }
         public UserManager<ApplicationUser> _userManager { get; set; }
         public RoleManager<ApplicationRole> _roleManager { get; }
+
         private readonly IConfiguration _configuration;
+
         private readonly MyDemoDBContext _context;
 
-        public LoginController(IUserService userService,
-            SignInManager<ApplicationUser> signInManager,
-            UserManager<ApplicationUser> userManager, IConfiguration configuration, RoleManager<ApplicationRole> roleManager, MyDemoDBContext context)
+        public LoginController(SignInManager<ApplicationUser> signInManager,
+            UserManager<ApplicationUser> userManager, 
+            IConfiguration configuration,
+            RoleManager<ApplicationRole> roleManager,
+            MyDemoDBContext context)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -85,7 +89,8 @@ namespace NewDemoProject.Controllers
             }
         }
 
-        [HttpPost("Login")]
+        [HttpPost]
+        [Route("Login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
@@ -116,19 +121,6 @@ namespace NewDemoProject.Controllers
                     claims: claims,
                     expires: DateTime.UtcNow.AddMinutes(30),
                     signingCredentials: creds);
-
-               //var userrole= await _userManager.GetRolesAsync(user);
-
-                //var addRoleResult = await _userManager.AddToRoleAsync(user, "Admin");
-                //if (addRoleResult.Succeeded)
-                //{
-                //    return Ok("Role assigned successfully");
-                //}
-                //else
-                //{
-                //    // Handle the case where role assignment fails
-                //    return BadRequest(addRoleResult.Errors);
-                //}
 
                 return Ok(new
                 {
