@@ -31,9 +31,10 @@ namespace API_Controller_Demo.Controllers
             _context = context;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [Route("CreateRole")]
-        [Authorize(Policy = "AdminPolicy")]
+        //[Authorize(Policy = "AdminPolicy")]
         public async Task<IActionResult> CreateRole([FromBody] string roleName)
         {
             if (!await _roleManager.RoleExistsAsync(roleName))
@@ -51,10 +52,10 @@ namespace API_Controller_Demo.Controllers
             return BadRequest("Role already exists.");
         }
 
+        [Authorize(Roles = "User, Admin")]
         [HttpGet]
         [Route("GetUserById")]
-        [Authorize(Policy = "UserPolicy")]
-        [Authorize(Policy = "AdminPolicy")]
+        //[Authorize(Policy = "UserPolicy, AdminPolicy")]
         public async Task<IActionResult> GetUserById(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
@@ -65,10 +66,10 @@ namespace API_Controller_Demo.Controllers
             return Ok(user);
         }
 
+        [Authorize(Roles = "User")]
         [HttpGet]
         [Route("GetUserByName")]
-        [Authorize(Policy = "UserPolicy")]
-        [Authorize(Policy = "AdminPolicy")]
+        //[Authorize(Policy = "UserPolicy, AdminPolicy")]
         public async Task<IActionResult> GetUserByName(string name)
         {
             var user = await _userManager.FindByNameAsync(name);
@@ -76,10 +77,7 @@ namespace API_Controller_Demo.Controllers
             {
                 return NotFound();
             }
-
             return Ok(user);
         }
-
-     
     }
 }
