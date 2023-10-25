@@ -5,13 +5,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InfrastructureLayer.Data
 {
-    public class MyDemoDBContext : IdentityDbContext<ApplicationUser>
+    public class MyDemoDBContext : IdentityDbContext<ApplicationUser,ApplicationRole,string>
     {
         public MyDemoDBContext(DbContextOptions options): base(options)
         {
         }
-
-        public virtual DbSet<User> Users { get; set; }
 
     }
 }
