@@ -1,43 +1,45 @@
 using ApplicationLayer.Interface;
 using DomainLayer.Entities;
+using InfrastructureLayer.Data;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using NewDemoProject.Model;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Transactions;
 using URF.Core.Abstractions;
 
 namespace NewDemoProject.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    [Authorize]
+    [AllowAnonymous]
     public class LoginController : ControllerBase
     {
         public SignInManager<ApplicationUser> _signInManager { get; set; }
         public UserManager<ApplicationUser> _userManager { get; set; }
         public RoleManager<ApplicationRole> _roleManager { get; }
-
-        private readonly IUserService _userService;
         private readonly IConfiguration _configuration;
+        private readonly MyDemoDBContext _context;
 
         public LoginController(IUserService userService,
             SignInManager<ApplicationUser> signInManager,
-            UserManager<ApplicationUser> userManager, IConfiguration configuration, RoleManager<ApplicationRole> roleManager)
+            UserManager<ApplicationUser> userManager, IConfiguration configuration, RoleManager<ApplicationRole> roleManager, MyDemoDBContext context)
         {
-            _userService = userService;
             _signInManager = signInManager;
             _userManager = userManager;
             _configuration = configuration;
             _roleManager = roleManager;
+            _context = context;
         }
 
         [HttpPost]
         [Route("Register")]
-        [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] UserRegisterModel user)
         {
             try
@@ -46,21 +48,36 @@ namespace NewDemoProject.Controllers
                 {
                     return BadRequest("User not found");
                 }
-                var appUser = new ApplicationUser
+                using (var transaction = await _context.Database.BeginTransactionAsync())
                 {
-                    UserName = user.Username,
-                    FirstName = user.Username,
-                    SecondName = user.Username,
-                    Email = user.Email,
-                };
-                
-                var userResult = await _userManager.CreateAsync(appUser, user.Password);
-                var roleResult = await _userManager.AddToRoleAsync(appUser, user.Role);
-                if (userResult.Succeeded && roleResult.Succeeded)
-                {
-                    return Ok("Registration successful");
+                    var appUser = new ApplicationUser
+                    {
+                        UserName = user.Username,
+                        FirstName = user.Username,
+                        SecondName = user.Username,
+                        Email = user.Email,
+                    };
+
+                    var userResult = await _userManager.CreateAsync(appUser, user.Password);
+                    if (userResult.Succeeded)
+                    {
+                        if (!await _roleManager.RoleExistsAsync(user.Role))
+                        {
+                            transaction.Rollback();
+                            return BadRequest("Role does not exist.");
+                        }
+
+                        await _userManager.AddToRoleAsync(appUser, user.Role);
+                        transaction.Commit();
+
+                        return Ok("User created and assigned to role.");
+                    }
+                    else
+                    {
+                        // Handle user creation errors, for example, duplicate username or password requirements not met.
+                        return BadRequest("User creation failed.");
+                    }
                 }
-                return BadRequest(userResult.Errors);
             }
             catch (Exception ex)
             {
@@ -69,21 +86,26 @@ namespace NewDemoProject.Controllers
         }
 
         [HttpPost("Login")]
-        [AllowAnonymous]
-   
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-
             var user = await _userManager.FindByEmailAsync(model.Email);
-
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                var claims = new[]
+                var userrole = await _userManager.GetRolesAsync(user);
+
+                var claims = new List<Claim>
                 {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-             };
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Role, "admin")
+                };
+
+                var roles = await _userManager.GetRolesAsync(user);
+                foreach (var role in roles)
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, role));
+                }
 
                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
                 var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -95,7 +117,7 @@ namespace NewDemoProject.Controllers
                     expires: DateTime.UtcNow.AddMinutes(30),
                     signingCredentials: creds);
 
-               var userrole= await _userManager.GetRolesAsync(user);
+               //var userrole= await _userManager.GetRolesAsync(user);
 
                 //var addRoleResult = await _userManager.AddToRoleAsync(user, "Admin");
                 //if (addRoleResult.Succeeded)
@@ -118,51 +140,16 @@ namespace NewDemoProject.Controllers
             return BadRequest("Login failed");
         }
 
-        [HttpGet]
-        [Route("GetUserById")]
-        [Authorize(Roles = "Admin")]
-     
-        public async Task<IActionResult> GetUserById(string id)
-        {
-            var user = await _userManager.FindByIdAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-            return Ok(user);
-        }
-
-        [HttpGet]
-        [Route("GetUserByName")]
-        [Authorize(Roles = "User")]
-        public async Task<IActionResult> GetUserByName(string name)
-        {
-            var user = await _userManager.FindByNameAsync(name);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return Ok(user);
-        }
-
         [HttpPost]
-        [Route("CreateRole")]
-        public async Task<IActionResult> CreateRole([FromBody] string roleName)
+        [Route("Logout")]
+        public async Task<IActionResult> Logout()
         {
-            if (!await _roleManager.RoleExistsAsync(roleName))
-            {
-                var newRole = new ApplicationRole { Name = roleName };
-                var result = await _roleManager.CreateAsync(newRole);
+            await _signInManager.SignOutAsync();
 
-                if (result.Succeeded)
-                {
-                    return Ok("Role created successfully.");
-                }
+            // Optionally, sign the user out of any external authentication providers like Google or Facebook.
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
-                return BadRequest("Role creation failed.");
-            }
-            return BadRequest("Role already exists.");
+            return Ok(new { message = "Logout successful" });
         }
     }
 }

@@ -34,6 +34,12 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddIdentity<ApplicationUser,ApplicationRole>(option => option.SignIn.RequireConfirmedAccount = false)
                 .AddEntityFrameworkStores<MyDemoDBContext>().AddDefaultTokenProviders();
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("UserPolicy", policy => policy.RequireRole("User"));
+});
+
 //builder.Services.AddDefaultIdentity<ApplicationUser>()
 //    .AddRoles<ApplicationRole>()
 //    .AddEntityFrameworkStores<MyDemoDBContext>();
@@ -57,14 +63,6 @@ builder.Services.AddAuthentication(cfg =>
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"])),
         };
     });
-
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AdminPolicy", policy =>
-    {
-        policy.RequireRole("admin");
-    });
-});
 
 builder.Services.AddSwaggerGen(c =>
 {
