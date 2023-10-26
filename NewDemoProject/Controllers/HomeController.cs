@@ -10,7 +10,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace API_Controller_Demo.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class HomeController : ControllerBase
     {

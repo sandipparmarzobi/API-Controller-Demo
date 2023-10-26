@@ -14,7 +14,7 @@ namespace NewDemoProject.Controllers
     [ApiController]
     [Route("[controller]")]
     [AllowAnonymous]
-    public class LoginController : ControllerBase
+    public class UserController : ControllerBase
     {
         public SignInManager<ApplicationUser> _signInManager { get; set; }
         public UserManager<ApplicationUser> _userManager { get; set; }
@@ -25,7 +25,7 @@ namespace NewDemoProject.Controllers
         private readonly JwtTokenHelper _jwtTokenHelper;
         private readonly MyDemoDBContext _context;
 
-        public LoginController(SignInManager<ApplicationUser> signInManager,
+        public UserController(SignInManager<ApplicationUser> signInManager,
             UserManager<ApplicationUser> userManager,
             IConfiguration configuration,
             RoleManager<ApplicationRole> roleManager,
@@ -118,6 +118,8 @@ namespace NewDemoProject.Controllers
             // Password checking
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
+                int? expirationMinutes=null;
+                // We can not user isPersistent in API project for remember me functionality.
                 await _signInManager.SignInAsync(user, isPersistent: model.RememberMe);
 
                 // Create claims for the login user for token.
@@ -134,19 +136,22 @@ namespace NewDemoProject.Controllers
                 }
                 var claimsIdentity = new ClaimsIdentity(claims, "JWT");
 
+                // For Manual Handle Remember Me
+                if (model.RememberMe)
+                {
+                    var expiresInMinutes = model.RememberMe ? 7 * 24 * 60 : 15;
+                    expirationMinutes = expiresInMinutes;
+                }
                 // Generate a JWT token using the JwtTokenHelper.
-                string token = _jwtTokenHelper.GenerateToken(claimsIdentity);
+                string token = _jwtTokenHelper.GenerateToken(claimsIdentity, expirationMinutes);
 
                 return Ok(new
                 {
                     Token = token,
                 });
             }
-
             return BadRequest("Login failed");
-        }
-
-
+        }   
 
         [HttpGet]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)

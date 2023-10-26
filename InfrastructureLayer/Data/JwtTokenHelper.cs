@@ -24,7 +24,7 @@ namespace InfrastructureLayer.Data
          
         }
 
-        public string GenerateToken(ClaimsIdentity claimsIdentity)
+        public string GenerateToken(ClaimsIdentity claimsIdentity, int? paramTokenExpirationMinutes=null)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -33,7 +33,7 @@ namespace InfrastructureLayer.Data
                 issuer: issuer,
                 audience: audience,
                 claims: claimsIdentity.Claims,
-                expires: DateTime.UtcNow.AddMinutes(tokenExpirationMinutes),
+                expires: paramTokenExpirationMinutes==null ? DateTime.UtcNow.AddMinutes(tokenExpirationMinutes) : DateTime.UtcNow.AddMinutes(paramTokenExpirationMinutes.Value),
                 signingCredentials: credentials
             );
 
