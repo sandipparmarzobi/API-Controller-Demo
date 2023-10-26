@@ -5,14 +5,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using NewDemoProject.Model;
-using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
-using System.Transactions;
-using URF.Core.Abstractions;
 
 namespace NewDemoProject.Controllers
 {
@@ -26,19 +21,24 @@ namespace NewDemoProject.Controllers
         public RoleManager<ApplicationRole> _roleManager { get; }
 
         private readonly IConfiguration _configuration;
-
+        private readonly IEmailService _emailService;
+        private readonly JwtTokenHelper _jwtTokenHelper;
         private readonly MyDemoDBContext _context;
 
         public LoginController(SignInManager<ApplicationUser> signInManager,
-            UserManager<ApplicationUser> userManager, 
+            UserManager<ApplicationUser> userManager,
             IConfiguration configuration,
             RoleManager<ApplicationRole> roleManager,
+            IEmailService emailService,
+            JwtTokenHelper jwtTokenHelper,
             MyDemoDBContext context)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _configuration = configuration;
             _roleManager = roleManager;
+            _emailService = emailService;
+            _jwtTokenHelper = jwtTokenHelper;
             _context = context;
         }
 
@@ -52,35 +52,50 @@ namespace NewDemoProject.Controllers
                 {
                     return BadRequest("User not found");
                 }
-                using (var transaction = await _context.Database.BeginTransactionAsync())
+                // Model validations
+                if (!ModelState.IsValid)
                 {
-                    var appUser = new ApplicationUser
+                    return BadRequest(ModelState);
+                }
+                // To check duplicate email or not
+                var existingUser = await _userManager.FindByEmailAsync(user.Email);
+                if (existingUser != null)
+                {
+                    ModelState.AddModelError("Email", "The email address is already in use. Please choose a different email address.");
+                    return BadRequest(new { errors = ModelState });
+                }
+              
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                var appUser = new ApplicationUser
+                {
+                    UserName = user.Username,
+                    FirstName = user.Username,
+                    SecondName = user.Username,
+                    Email = user.Email,
+                };
+                var userResult = await _userManager.CreateAsync(appUser, user.Password);
+                if (userResult.Succeeded)
+                {
+                    if (!await _roleManager.RoleExistsAsync(user.Role))
                     {
-                        UserName = user.Username,
-                        FirstName = user.Username,
-                        SecondName = user.Username,
-                        Email = user.Email,
-                    };
-
-                    var userResult = await _userManager.CreateAsync(appUser, user.Password);
-                    if (userResult.Succeeded)
-                    {
-                        if (!await _roleManager.RoleExistsAsync(user.Role))
-                        {
-                            transaction.Rollback();
-                            return BadRequest("Role does not exist.");
-                        }
-
-                        await _userManager.AddToRoleAsync(appUser, user.Role);
-                        transaction.Commit();
-
-                        return Ok("User created and assigned to role.");
+                        transaction.Rollback();
+                        return BadRequest("Provided Role does not exist.");
                     }
-                    else
+                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(appUser);
+                    var tokenLink = Url.Action("ConfirmEmail", "Login", new { userId = appUser.Id, token }, Request.Scheme);
+                    if (!_emailService.SendEmail("sandip.parmar@zobiwebsolutions.com", "Email Confirmation", tokenLink))
                     {
-                        // Handle user creation errors, for example, duplicate username or password requirements not met.
-                        return BadRequest("User creation failed.");
+                        transaction.Rollback();
+                        return BadRequest("User not created due to email service issue.");
                     }
+                    await _userManager.AddToRoleAsync(appUser, user.Role);
+                    transaction.Commit();
+                    return Ok("User created and send the email for account confirmation");
+                }
+                else
+                {
+
+                    return BadRequest(userResult.Errors);
                 }
             }
             catch (Exception ex)
@@ -93,43 +108,65 @@ namespace NewDemoProject.Controllers
         [Route("Login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
+            // Mail confirmation checking
             var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user != null && !await _userManager.IsEmailConfirmedAsync(user))
+            {
+                ModelState.AddModelError(string.Empty, "You must confirm your email before logging in.");
+                return BadRequest(ModelState);
+            }
+            // Password checking
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                var userrole = await _userManager.GetRolesAsync(user);
+                await _signInManager.SignInAsync(user, isPersistent: model.RememberMe);
 
+                // Create claims for the login user for token.
                 var claims = new List<Claim>
                 {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.Role, "admin")
+                    new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()), 
+                    new Claim(ClaimTypes.Name, user.UserName),
+                    new Claim(ClaimTypes.Email, user.Email),
                 };
-
                 var roles = await _userManager.GetRolesAsync(user);
                 foreach (var role in roles)
                 {
                     claims.Add(new Claim(ClaimTypes.Role, role));
                 }
+                var claimsIdentity = new ClaimsIdentity(claims, "JWT");
 
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
-                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-                var token = new JwtSecurityToken(
-                    issuer: _configuration["JWT:ValidIssuer"],
-                    audience: _configuration["JWT:ValidAudience"],
-                    claims: claims,
-                    expires: DateTime.UtcNow.AddMinutes(30),
-                    signingCredentials: creds);
+                // Generate a JWT token using the JwtTokenHelper.
+                string token = _jwtTokenHelper.GenerateToken(claimsIdentity);
 
                 return Ok(new
                 {
-                    token = new JwtSecurityTokenHandler().WriteToken(token),
-                    expiration = token.ValidTo
+                    Token = token,
                 });
             }
 
             return BadRequest("Login failed");
+        }
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return BadRequest("Error");
+            }
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (result.Succeeded)
+            {
+                // Redirect to a success page
+                return Ok("Email confirmed successfully");
+            }
+            else
+            {
+                // Handle confirmation failure
+                return BadRequest("Error");
+            }
         }
 
         [HttpPost]

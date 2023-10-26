@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using URF.Core.Abstractions;
@@ -26,6 +25,7 @@ builder.Services.AddScoped<DbContext, MyDemoDBContext>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITrackableRepository<User>, TrackableRepository<User>>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IEmailService, EmailService  >();
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -33,8 +33,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 //For User and Role 
-builder.Services.AddIdentity<ApplicationUser,ApplicationRole>(option => option.SignIn.RequireConfirmedAccount = false)
-                .AddEntityFrameworkStores<MyDemoDBContext>().AddDefaultTokenProviders();
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(option => {
+    option.User.RequireUniqueEmail = true;
+    option.SignIn.RequireConfirmedAccount = true;
+    
+}).AddEntityFrameworkStores<MyDemoDBContext>().AddDefaultTokenProviders();
 // JWT Token Service
 builder.Services.AddAuthentication(cfg =>
 {
@@ -53,6 +56,7 @@ builder.Services.AddAuthentication(cfg =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"])),
     };
 });
+
 // For Swagger Authorize button
 builder.Services.AddSwaggerGen(c =>
 {
@@ -77,6 +81,17 @@ builder.Services.AddSwaggerGen(c =>
                 new string[] { }
             }
         });
+});
+
+// For JWTTokenHelper Injection
+builder.Services.AddSingleton(sp =>
+{
+    var secretKey = builder.Configuration["JWT:Secret"]; 
+    var issuer = builder.Configuration["JWT:ValidIssuer"];
+    var audience = builder.Configuration["JWT:ValidAudience"]; 
+    var tokenExpirationMinutes = 60; 
+
+    return new JwtTokenHelper(secretKey, issuer, audience, tokenExpirationMinutes);
 });
 
 var app = builder.Build();
