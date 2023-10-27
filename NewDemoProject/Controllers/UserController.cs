@@ -82,7 +82,7 @@ namespace NewDemoProject.Controllers
                         return BadRequest("Provided Role does not exist.");
                     }
                     var token = await _userManager.GenerateEmailConfirmationTokenAsync(appUser);
-                    var tokenLink = Url.Action("ConfirmEmail", "Login", new { userId = appUser.Id, token }, Request.Scheme);
+                    var tokenLink = Url.Action("ConfirmEmail", "User", new { userId = appUser.Id, token }, Request.Scheme);
                     if (!_emailService.SendEmail("sandip.parmar@zobiwebsolutions.com", "Email Confirmation", tokenLink))
                     {
                         transaction.Rollback();
