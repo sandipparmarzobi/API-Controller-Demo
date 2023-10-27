@@ -84,7 +84,7 @@ namespace NewDemoProject.Controllers
                     }
                     var token = await _userManager.GenerateEmailConfirmationTokenAsync(appUser);
                     var tokenLink = Url.Action("ConfirmEmail", "User", new { userId = appUser.Id, token }, Request.Scheme);
-                    if (!_emailService.SendEmail("sandip.parmar@zobiwebsolutions.com", "Email Confirmation", tokenLink))
+                    if (!_emailService.SendEmail("sandip.parmar@zobiwebsolutions.com",string.Empty, "Email Confirmation", tokenLink))
                     {
                         transaction.Rollback();
                         return BadRequest("User not created due to email service issue.");
@@ -129,6 +129,7 @@ namespace NewDemoProject.Controllers
                     new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()), 
                     new Claim(ClaimTypes.Name, user.UserName),
                     new Claim(ClaimTypes.Email, user.Email),
+                    new Claim(JwtRegisteredClaimNames.Iat,new DateTimeOffset(DateTime.Now).ToString())
                 };
                 var roles = await _userManager.GetRolesAsync(user);
                 foreach (var role in roles)

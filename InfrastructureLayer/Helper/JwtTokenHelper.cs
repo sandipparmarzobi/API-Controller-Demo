@@ -21,7 +21,6 @@ namespace InfrastructureLayer.Helper
             this.issuer = issuer;
             this.audience = audience;
             this.tokenExpirationMinutes = tokenExpirationMinutes;
-
         }
 
         public string GenerateToken(ClaimsIdentity claimsIdentity, int? paramTokenExpirationMinutes = null)
@@ -33,6 +32,7 @@ namespace InfrastructureLayer.Helper
                 issuer: issuer,
                 audience: audience,
                 claims: claimsIdentity.Claims,
+                
                 expires: paramTokenExpirationMinutes == null ? DateTime.UtcNow.AddMinutes(tokenExpirationMinutes) : DateTime.UtcNow.AddMinutes(paramTokenExpirationMinutes.Value),
                 signingCredentials: credentials
             );

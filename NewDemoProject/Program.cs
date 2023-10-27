@@ -22,13 +22,13 @@ builder.Services.AddDbContext<MyDemoDBContext>(options =>
 // Inject DBContext class for UnitOfWork
 builder.Services.AddScoped<DbContext, MyDemoDBContext>();
 
-// Dependancy Injection
+// Dependancy Injection for Unit Of Work and Repository.
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITrackableRepository<User>, TrackableRepository<User>>();
 builder.Services.AddScoped<IUserService, UserService>();
 //builder.Services.AddScoped<IEmailService, EmailService  >();
 
-// Email Service
+// Dependancy Injection for Email Service
 builder.Services.AddSingleton<IEmailService, EmailService>(sp =>
 {
   var ServiceProvide = builder.Services.BuildServiceProvider();
@@ -40,12 +40,13 @@ builder.Services.AddSingleton<IEmailService, EmailService>(sp =>
   var senderEmail = builder.Configuration["SmtpConfig:SenderEmail"];
     return new EmailService(smtpServer, smtpPort, smtpUsername, smtpPassword, senderEmail,logger);
 });
+
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//For User and Role 
+//Dependancy Injection For User and Role 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(option => {
     option.User.RequireUniqueEmail = true;
     option.SignIn.RequireConfirmedAccount = true;
