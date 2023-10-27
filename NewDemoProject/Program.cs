@@ -2,6 +2,7 @@ using ApplicationLayer.Interface;
 using ApplicationLayer.Services;
 using DomainLayer.Entities;
 using InfrastructureLayer.Data;
+using InfrastructureLayer.Helper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -25,8 +26,20 @@ builder.Services.AddScoped<DbContext, MyDemoDBContext>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITrackableRepository<User>, TrackableRepository<User>>();
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IEmailService, EmailService  >();
+//builder.Services.AddScoped<IEmailService, EmailService  >();
 
+// Email Service
+builder.Services.AddSingleton<IEmailService, EmailService>(sp =>
+{
+  var ServiceProvide = builder.Services.BuildServiceProvider();
+  var logger=ServiceProvide.GetRequiredService<ILogger<EmailService>>();
+  var smtpServer = builder.Configuration["SmtpConfig:SmtpServer"];
+  var smtpPort = int.Parse(builder.Configuration["SmtpConfig:SmtpPort"]);
+  var smtpUsername = builder.Configuration["SmtpConfig:SmtpUsername"];
+  var smtpPassword = builder.Configuration["SmtpConfig:SmtpPassword"];
+  var senderEmail = builder.Configuration["SmtpConfig:SenderEmail"];
+    return new EmailService(smtpServer, smtpPort, smtpUsername, smtpPassword, senderEmail,logger);
+});
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

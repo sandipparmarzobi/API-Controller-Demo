@@ -11,42 +11,41 @@ namespace ApplicationLayer.Services
 {
     public class EmailService : IEmailService
     {
-        private readonly IConfiguration _configuration;
         private readonly ILogger<EmailService> _logger;
-        private readonly string smtpServer;
-        private readonly int smtpPort;
-        private readonly string smtpUsername;
-        private readonly string smtpPassword;
-        private readonly string senderEmail;
-        public EmailService(IConfiguration configuration, ILogger<EmailService> logger)
+        private readonly string _smtpServer;
+        private readonly int _smtpPort;
+        private readonly string _smtpUsername;
+        private readonly string _smtpPassword;
+        private readonly string _senderEmail;
+        public EmailService(string smtpServer,int smtpPort,string smtpUsername, string smtpPassword,string senderEmail, ILogger<EmailService> logger)
         {
-            _configuration = configuration;
-            _logger = logger;
-            smtpServer = _configuration["SmtpConfig:SmtpServer"];
-            smtpPort = int.Parse(_configuration["SmtpConfig:SmtpPort"]);
-            smtpUsername = _configuration["SmtpConfig:SmtpUsername"];
-            smtpPassword = _configuration["SmtpConfig:SmtpPassword"];
-            senderEmail = _configuration["SmtpConfig:SenderEmail"];
+            _smtpServer = smtpServer;
+            _smtpPort = smtpPort;
+            _smtpUsername = smtpUsername;
+            _smtpPassword = smtpPassword;
+            _senderEmail = senderEmail;
         }
 
-        public bool SendEmail(string To, string subject, string emailBody)
+
+        public bool SendEmail(string To,string CC, string subject, string emailBody)
         {
             try
             {
-                using var smtpClient = new SmtpClient(smtpServer, smtpPort);
+                using var smtpClient = new SmtpClient(_smtpServer, _smtpPort);
                 smtpClient.UseDefaultCredentials = false;
-                smtpClient.Credentials = new NetworkCredential(smtpUsername, smtpPassword);
+                smtpClient.Credentials = new NetworkCredential(_smtpUsername, _smtpPassword);
                 smtpClient.EnableSsl = true;
 
                 var mailMessage = new MailMessage
                 {
-                    From = new MailAddress(senderEmail),
+                    From = new MailAddress(_senderEmail),
                     Subject = subject,
                     Body = emailBody,
                     IsBodyHtml = true,
                 };
 
                 mailMessage.To.Add(To);
+                mailMessage.CC.Add(CC);
 
                 smtpClient.Send(mailMessage);
                 return true;

@@ -6,7 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace InfrastructureLayer.Data
+namespace InfrastructureLayer.Helper
 {
     public class JwtTokenHelper
     {
@@ -21,10 +21,10 @@ namespace InfrastructureLayer.Data
             this.issuer = issuer;
             this.audience = audience;
             this.tokenExpirationMinutes = tokenExpirationMinutes;
-         
+
         }
 
-        public string GenerateToken(ClaimsIdentity claimsIdentity, int? paramTokenExpirationMinutes=null)
+        public string GenerateToken(ClaimsIdentity claimsIdentity, int? paramTokenExpirationMinutes = null)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -33,7 +33,7 @@ namespace InfrastructureLayer.Data
                 issuer: issuer,
                 audience: audience,
                 claims: claimsIdentity.Claims,
-                expires: paramTokenExpirationMinutes==null ? DateTime.UtcNow.AddMinutes(tokenExpirationMinutes) : DateTime.UtcNow.AddMinutes(paramTokenExpirationMinutes.Value),
+                expires: paramTokenExpirationMinutes == null ? DateTime.UtcNow.AddMinutes(tokenExpirationMinutes) : DateTime.UtcNow.AddMinutes(paramTokenExpirationMinutes.Value),
                 signingCredentials: credentials
             );
 
