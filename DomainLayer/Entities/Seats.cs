@@ -13,5 +13,7 @@ namespace DomainLayer.Entities
         public Theater? Theater { get; set; }
         public Guid? ShowTimeId { get; set; }
         public ShowTime? ShowTime { get; set; }
+        public ICollection<Booking>? Bookings { get; set; }
+        public ICollection<SeatBooking>? SeatBooking { get; set; }
     }
 }

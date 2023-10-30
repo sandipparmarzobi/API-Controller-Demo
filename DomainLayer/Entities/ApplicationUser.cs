@@ -6,6 +6,8 @@ namespace DomainLayer.Entities
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public DateTime? RegistrationDate { get; set; }    
+        public DateTime? RegistrationDate { get; set; }
+        public ICollection<Booking>? Bookings { get; set; }
+        public ICollection<Reviews>? Reviews { get; set; }
     }
 }

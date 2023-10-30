@@ -15,5 +15,8 @@ namespace DomainLayer.Entities
         public string Director { get; set; }
         public string PosterURL { get; set; }
         public string TrailerURL { get; set; }
+        public ICollection<Booking>? Bookings { get; set; }
+        public ICollection<Reviews>? Reviews { get; set; }
+        public ICollection<ShowTime>? ShowTime { get; set; }
     }
 }
