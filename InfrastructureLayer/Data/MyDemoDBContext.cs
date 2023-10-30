@@ -35,7 +35,7 @@ namespace InfrastructureLayer.Data
             modelBuilder.Entity<ApplicationUser>()
             .HasMany(m => m.Bookings)
             .WithOne(b => b.User)
-            .HasForeignKey(b => b.UserI     d);
+            .HasForeignKey(b => b.UserId);
 
             modelBuilder.Entity<ApplicationUser>()
                 .HasMany(m => m.Reviews)
