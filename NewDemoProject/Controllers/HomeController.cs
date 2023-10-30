@@ -41,7 +41,6 @@ namespace API_Controller_Demo.Controllers
                 {
                     return Ok("Role created successfully.");
                 }
-
                 return BadRequest("Role creation failed.");
             }
             return BadRequest("Role already exists.");

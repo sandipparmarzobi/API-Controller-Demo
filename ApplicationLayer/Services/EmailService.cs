@@ -24,6 +24,7 @@ namespace ApplicationLayer.Services
             _smtpUsername = smtpUsername;
             _smtpPassword = smtpPassword;
             _senderEmail = senderEmail;
+            _logger = logger;
         }
 
 

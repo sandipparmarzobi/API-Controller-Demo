@@ -71,7 +71,7 @@ namespace NewDemoProject.Controllers
                 {
                     UserName = user.Username,
                     FirstName = user.Username,
-                    SecondName = user.Username,
+                    
                     Email = user.Email,
                 };
                 var userResult = await _userManager.CreateAsync(appUser, user.Password);
@@ -92,10 +92,9 @@ namespace NewDemoProject.Controllers
                     await _userManager.AddToRoleAsync(appUser, user.Role);
                     transaction.Commit();
                     return Ok("User created and send the email for account confirmation");
-                }
+                }       
                 else
                 {
-
                     return BadRequest(userResult.Errors);
                 }
             }

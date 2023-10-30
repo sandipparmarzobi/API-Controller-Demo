@@ -20,6 +20,7 @@ namespace ApplicationLayer.Services
         {
             return Repository.Queryable().FirstOrDefault(x => x.Username == userName);
         }
+
         public User? GetByNameQueryableSql(string userName)
         {
             return null;

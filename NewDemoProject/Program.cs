@@ -31,8 +31,9 @@ builder.Services.AddScoped<IUserService, UserService>();
 // Dependancy Injection for Email Service
 builder.Services.AddSingleton<IEmailService, EmailService>(sp =>
 {
-  var ServiceProvide = builder.Services.BuildServiceProvider();
-  var logger=ServiceProvide.GetRequiredService<ILogger<EmailService>>();
+  var ServiceProvider = builder.Services.BuildServiceProvider();
+  var logger= ServiceProvider.GetRequiredService<ILogger<EmailService>>();
+
   var smtpServer = builder.Configuration["SmtpConfig:SmtpServer"];
   var smtpPort = int.Parse(builder.Configuration["SmtpConfig:SmtpPort"]);
   var smtpUsername = builder.Configuration["SmtpConfig:SmtpUsername"];
