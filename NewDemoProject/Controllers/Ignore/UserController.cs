@@ -10,7 +10,7 @@ using NewDemoProject.Model;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
-namespace NewDemoProject.Controllers
+namespace API_Controller_Demo.Controllers.Ignore
 {
     [ApiController]
     [Route("[controller]")]
@@ -65,13 +65,13 @@ namespace NewDemoProject.Controllers
                     ModelState.AddModelError("Email", "The email address is already in use. Please choose a different email address.");
                     return BadRequest(new { errors = ModelState });
                 }
-              
+
                 using var transaction = await _context.Database.BeginTransactionAsync();
                 var appUser = new ApplicationUser
                 {
                     UserName = user.Username,
                     FirstName = user.Username,
-                    
+
                     Email = user.Email,
                 };
                 var userResult = await _userManager.CreateAsync(appUser, user.Password);
@@ -84,7 +84,7 @@ namespace NewDemoProject.Controllers
                     }
                     var token = await _userManager.GenerateEmailConfirmationTokenAsync(appUser);
                     var tokenLink = Url.Action("ConfirmEmail", "User", new { userId = appUser.Id, token }, Request.Scheme);
-                    if (!_emailService.SendEmail("sandip.parmar@zobiwebsolutions.com",string.Empty, "Email Confirmation", tokenLink))
+                    if (!_emailService.SendEmail("sandip.parmar@zobiwebsolutions.com", string.Empty, "Email Confirmation", tokenLink))
                     {
                         transaction.Rollback();
                         return BadRequest("User not created due to email service issue.");
@@ -92,7 +92,7 @@ namespace NewDemoProject.Controllers
                     await _userManager.AddToRoleAsync(appUser, user.Role);
                     transaction.Commit();
                     return Ok("User created and send the email for account confirmation");
-                }       
+                }
                 else
                 {
                     return BadRequest(userResult.Errors);
@@ -118,14 +118,14 @@ namespace NewDemoProject.Controllers
             // Password checking
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                int? expirationMinutes=null;
+                int? expirationMinutes = null;
                 // We can not user isPersistent in API project for remember me functionality.
                 await _signInManager.SignInAsync(user, isPersistent: model.RememberMe);
 
                 // Create claims for the login user for token.
                 var claims = new List<Claim>
                 {
-                    new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()), 
+                    new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                     new Claim(ClaimTypes.Name, user.UserName),
                     new Claim(ClaimTypes.Email, user.Email),
                     new Claim(JwtRegisteredClaimNames.Iat,new DateTimeOffset(DateTime.Now).ToString())
@@ -152,7 +152,7 @@ namespace NewDemoProject.Controllers
                 });
             }
             return BadRequest("Login failed");
-        }   
+        }
 
         [HttpGet]
         public async Task<IActionResult> ConfirmEmail(string userId, string token)

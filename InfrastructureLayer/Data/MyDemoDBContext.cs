@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace InfrastructureLayer.Data
 {
-    public class MyDemoDBContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
+    public class MyDemoDBContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
     {
         public MyDemoDBContext(DbContextOptions options) : base(options)
         {
@@ -173,19 +173,5 @@ namespace InfrastructureLayer.Data
 
             #endregion
         }
-
-        //protected override void OnModelCreating(ModelBuilder modelBuilder)
-        //{
-        //    modelBuilder.Entity<Tickets>()
-        //        .HasOne<Movie>(s => s.Movie)
-        //        .WithMany(g => g.Tickets)
-        //        .HasForeignKey(s => s.MovieId)
-        //        .OnDelete(DeleteBehavior.Cascade);
-
-        //    modelBuilder
-        //    .Entity<Tickets>()
-        //    .Property(d => d.Gender)
-        //    .HasConversion(new EnumToStringConverter<Gender>());
-        //}
     }
 }

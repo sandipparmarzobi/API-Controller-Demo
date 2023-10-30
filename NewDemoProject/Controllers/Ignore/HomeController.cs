@@ -1,14 +1,9 @@
-﻿using ApplicationLayer.Interface;
-using DomainLayer.Entities;
-using InfrastructureLayer.Data;
+﻿using DomainLayer.Entities;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
-namespace API_Controller_Demo.Controllers
+namespace API_Controller_Demo.Controllers.Ignore
 {
     [Route("[controller]")]
     [ApiController]

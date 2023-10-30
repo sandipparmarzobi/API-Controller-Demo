@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace InfrastructureLayer.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateMovieTables : Migration
+    public partial class createMovieTables : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,7 +15,7 @@ namespace InfrastructureLayer.Migrations
                 name: "AspNetRoles",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -29,7 +29,7 @@ namespace InfrastructureLayer.Migrations
                 name: "AspNetUsers",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     RegistrationDate = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -60,7 +60,7 @@ namespace InfrastructureLayer.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ReleaseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Genre = table.Column<int>(type: "int", nullable: false),
+                    Genre = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Duration = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Director = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -92,7 +92,7 @@ namespace InfrastructureLayer.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
@@ -113,7 +113,7 @@ namespace InfrastructureLayer.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
@@ -135,7 +135,7 @@ namespace InfrastructureLayer.Migrations
                     LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ProviderKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -152,8 +152,8 @@ namespace InfrastructureLayer.Migrations
                 name: "AspNetUserRoles",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    RoleId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RoleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -176,7 +176,7 @@ namespace InfrastructureLayer.Migrations
                 name: "AspNetUserTokens",
                 columns: table => new
                 {
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -201,15 +201,14 @@ namespace InfrastructureLayer.Migrations
                     Comments = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ReviewDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    UserId1 = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     MovieId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Reviews", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Reviews_AspNetUsers_UserId1",
-                        column: x => x.UserId1,
+                        name: "FK_Reviews_AspNetUsers_UserId",
+                        column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                     table.ForeignKey(
@@ -245,39 +244,6 @@ namespace InfrastructureLayer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Booking",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TotalTicket = table.Column<int>(type: "int", nullable: false),
-                    TotalPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    BookingDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    UserId1 = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    MovieId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ShowTimeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Booking", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Booking_AspNetUsers_UserId1",
-                        column: x => x.UserId1,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Booking_Movie_MovieId",
-                        column: x => x.MovieId,
-                        principalTable: "Movie",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Booking_ShowTime_ShowTimeId",
-                        column: x => x.ShowTimeId,
-                        principalTable: "ShowTime",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Seats",
                 columns: table => new
                 {
@@ -299,6 +265,44 @@ namespace InfrastructureLayer.Migrations
                         name: "FK_Seats_Theater_TheaterId",
                         column: x => x.TheaterId,
                         principalTable: "Theater",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Booking",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TotalTicket = table.Column<int>(type: "int", nullable: false),
+                    TotalPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    BookingDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    MovieId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ShowTimeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    SeatsId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Booking", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Booking_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Booking_Movie_MovieId",
+                        column: x => x.MovieId,
+                        principalTable: "Movie",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Booking_Seats_SeatsId",
+                        column: x => x.SeatsId,
+                        principalTable: "Seats",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Booking_ShowTime_ShowTimeId",
+                        column: x => x.ShowTimeId,
+                        principalTable: "ShowTime",
                         principalColumn: "Id");
                 });
 
@@ -372,14 +376,19 @@ namespace InfrastructureLayer.Migrations
                 column: "MovieId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Booking_SeatsId",
+                table: "Booking",
+                column: "SeatsId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Booking_ShowTimeId",
                 table: "Booking",
                 column: "ShowTimeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Booking_UserId1",
+                name: "IX_Booking_UserId",
                 table: "Booking",
-                column: "UserId1");
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reviews_MovieId",
@@ -387,9 +396,9 @@ namespace InfrastructureLayer.Migrations
                 column: "MovieId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Reviews_UserId1",
+                name: "IX_Reviews_UserId",
                 table: "Reviews",
-                column: "UserId1");
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_SeatBooking_BookingId",
@@ -453,10 +462,10 @@ namespace InfrastructureLayer.Migrations
                 name: "Booking");
 
             migrationBuilder.DropTable(
-                name: "Seats");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Seats");
 
             migrationBuilder.DropTable(
                 name: "ShowTime");
