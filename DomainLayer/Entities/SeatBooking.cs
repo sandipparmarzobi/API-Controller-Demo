@@ -12,6 +12,6 @@ namespace DomainLayer.Entities
         public Guid? BookingId { get; set; }
         public Booking? Booking { get; set; }
         public Guid? SeatId { get; set; }
-        public Seats? Seat { get; set; }
+        public Seats? Seats { get; set; }
     }
 }

@@ -20,8 +20,6 @@ namespace InfrastructureLayer.Data
         public DbSet<Seats> Seats { get; set; }
         public DbSet<SeatBooking> SeatBooking { get; set; }
         public DbSet<Reviews> Reviews { get; set; }
-
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -32,13 +30,12 @@ namespace InfrastructureLayer.Data
             .Property(d => d.Genre)
             .HasConversion(new EnumToStringConverter<MovieGenre>());
 
-
             #region Application User
 
             modelBuilder.Entity<ApplicationUser>()
             .HasMany(m => m.Bookings)
             .WithOne(b => b.User)
-            .HasForeignKey(b => b.UserId);
+            .HasForeignKey(b => b.UserI     d);
 
             modelBuilder.Entity<ApplicationUser>()
                 .HasMany(m => m.Reviews)
@@ -126,7 +123,7 @@ namespace InfrastructureLayer.Data
                .HasForeignKey(b => b.BookingId);
 
             modelBuilder.Entity<SeatBooking>()
-                .HasOne(b => b.Seat)
+                .HasOne(b => b.Seats)
                 .WithMany(u => u.SeatBooking)
                 .HasForeignKey(b => b.SeatId);
 
@@ -146,7 +143,7 @@ namespace InfrastructureLayer.Data
 
             modelBuilder.Entity<Seats>()
                 .HasMany(m => m.SeatBooking)
-                .WithOne(b => b.Seat)
+                .WithOne(b => b.Seats)
                 .HasForeignKey(b => b.SeatId);
 
             #endregion
