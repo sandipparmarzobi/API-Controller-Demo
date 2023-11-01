@@ -23,10 +23,31 @@ namespace API_Controller_Demo.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        [Route("CreateRole")]
+        [Route("AddNewMovie")]
         public async Task<IActionResult> AddNewMovie()
         {
-            return BadRequest("Role already exists.");
+            return Ok("Add New Movie");
+        }
+
+        [HttpPost]
+        [Route("GetMovie")]
+        public async Task<IActionResult> GetMovie()
+        {
+            return Ok("Get Movie");
+        }
+
+        [HttpPost]
+        [Route("Update")]
+        public async Task<IActionResult> Update()
+        {
+            return Ok("Get Movie");
+        }
+
+        [HttpPost]
+        [Route("Delete")]
+        public async Task<IActionResult> Delete()
+        {
+            return Ok("Get Movie");
         }
     }
 }

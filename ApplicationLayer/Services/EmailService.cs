@@ -46,8 +46,6 @@ namespace ApplicationLayer.Services
                 };
 
                 mailMessage.To.Add(To);
-                mailMessage.CC.Add(CC);
-
                 smtpClient.Send(mailMessage);
                 return true;
             }

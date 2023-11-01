@@ -6,6 +6,7 @@ using InfrastructureLayer.Helper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -109,7 +110,14 @@ builder.Services.AddSingleton(sp =>
     return new JwtTokenHelper(secretKey, issuer, audience, tokenExpirationMinutes);
 });
 
+
 var app = builder.Build();
+app.UseCors(x => x
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+
+app.UseHttpsRedirection();
 
 if (app.Environment.IsDevelopment())
 {

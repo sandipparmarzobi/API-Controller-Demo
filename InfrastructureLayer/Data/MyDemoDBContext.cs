@@ -30,6 +30,8 @@ namespace InfrastructureLayer.Data
             .Property(d => d.Genre)
             .HasConversion(new EnumToStringConverter<MovieGenre>());
 
+          
+
             #region Application User
 
             modelBuilder.Entity<ApplicationUser>()

@@ -1,4 +1,6 @@
-﻿using ApplicationLayer.Interface;
+﻿using API_Controller_Demo.Model;
+using ApplicationLayer.Interface;
+using Azure;
 using DomainLayer.Entities;
 using InfrastructureLayer.Data;
 using InfrastructureLayer.Helper;
@@ -34,7 +36,7 @@ namespace API_Controller_Demo.Controllers
             _emailService = emailService;
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPost]
         [Route("CreateRole")]
         public async Task<IActionResult> CreateRole([FromBody] string roleName)
@@ -58,55 +60,138 @@ namespace API_Controller_Demo.Controllers
 
         [HttpPost]
         [Route("Login")]
-        public async Task<IActionResult> Login([FromBody] LoginModel model)
+        public async Task<ActionResultData> Login([FromBody] LoginModel model)
         {
-            // User and Mail confirmation checking
-            var user = await _userManager.FindByEmailAsync(model.Email);
-            if (user != null && !await _userManager.IsEmailConfirmedAsync(user))
+            var rtn = new ActionResultData();
+            try
             {
-                ModelState.AddModelError(string.Empty, "You must confirm your email before logging in.");
-                return BadRequest(ModelState);
+                // User and Mail confirmation checking
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user != null && !await _userManager.IsEmailConfirmedAsync(user))
+                {
+                    rtn.Message = "You must confirm your email before logging in.";
+                    return rtn;
+                }
+                // Password checking
+                if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
+                {
+                    int? expirationMinutes = null;
+
+                    // Create claims for the login user for the generate token.
+                    var claims = new List<Claim>
+                    {
+                        new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                        new Claim(ClaimTypes.Name, user.UserName),
+                        new Claim(ClaimTypes.Email, user.Email),
+                        new Claim(JwtRegisteredClaimNames.Iat,new DateTimeOffset(DateTime.Now).ToString())
+                    };
+
+                    var roles = await _userManager.GetRolesAsync(user);
+                    foreach (var role in roles)
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, role));
+                    }
+                    var claimsIdentity = new ClaimsIdentity(claims, "JWT");
+
+                    // For Manual Handle Remember Me
+                    if (model.RememberMe)
+                    {
+                        var expiresInMinutes = model.RememberMe ? 7 * 24 * 60 : 15;
+                        expirationMinutes = expiresInMinutes;
+                    }
+                    // Generate a JWT token using the JwtTokenHelper.
+                    string token = _jwtTokenHelper.GenerateToken(claimsIdentity, expirationMinutes);
+
+                    rtn.Message = "\"User created and send the email for account confirmation";
+                    rtn.Status = DomainLayer.Enums.Status.Success;
+                    rtn.Data = token;
+                    return rtn;
+                }
+                else
+                {
+                    rtn.Message = "Invalid Email or Password";
+                    return rtn;
+
+                }
             }
-            // Password checking
-            if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
+            catch (Exception ex)
             {
-                int? expirationMinutes = null;
-
-                // Create claims for the login user for the generate token.
-                var claims = new List<Claim>
-                {
-                    new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(JwtRegisteredClaimNames.Iat,new DateTimeOffset(DateTime.Now).ToString())
-                };
-                var roles = await _userManager.GetRolesAsync(user);
-                foreach (var role in roles)
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, role));
-                }
-                var claimsIdentity = new ClaimsIdentity(claims, "JWT");
-
-                // For Manual Handle Remember Me
-                if (model.RememberMe)
-                {
-                    var expiresInMinutes = model.RememberMe ? 7 * 24 * 60 : 15;
-                    expirationMinutes = expiresInMinutes;
-                }
-                // Generate a JWT token using the JwtTokenHelper.
-                string token = _jwtTokenHelper.GenerateToken(claimsIdentity, expirationMinutes);
-
-                return Ok(new
-                {
-                    Token = token,
-                });
+                rtn.Message = ex.Message;
+                return rtn;
             }
-            return Unauthorized();
         }
 
         [HttpPost]
-        [Route("Register")]
-        public async Task<IActionResult> Register([FromBody] UserRegisterModel user)
+        [Route("RegisterNormalUser")]
+        public async Task<ActionResultData> RegisterNormalUser([FromBody] UserRegisterModel user)
+        {
+            var rtn = new ActionResultData();
+            try
+            {
+                if (user == null)
+                {
+                    rtn.Message = "User not found";
+                    return rtn;
+                }
+                if (!ModelState.IsValid)
+                {
+                    var errorList = (from item in ModelState.Values
+                                     from error in item.Errors
+                                     select error.ErrorMessage).ToString();
+                    rtn.Message = errorList;
+                    return rtn;
+                }
+                // To check duplicate email or not
+                var existingUser = await _userManager.FindByEmailAsync(user.Email);
+                if (existingUser != null)
+                {
+                    rtn.Message = "The email address is already in use. Please choose a different email address.";
+                    return rtn;
+                }
+
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                ApplicationUser appUser = ConvertToApplicationUser(user);
+                var userResult = await _userManager.CreateAsync(appUser, user.Password);
+                if (userResult.Succeeded)
+                {
+                    if (!await _roleManager.RoleExistsAsync("User"))
+                    {
+                        transaction.Rollback();
+                        rtn.Message = "Provided Role does not exist.";
+                        return rtn;
+                    }
+                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(appUser);
+                    var tokenLink = Url.Action("ConfirmEmail", "User", new { userId = appUser.Id, token }, Request.Scheme);
+                    if (!_emailService.SendEmail("sandip.parmar@zobiwebsolutions.com", string.Empty, "Email Confirmation", tokenLink))
+                    {
+                        transaction.Rollback();
+                        rtn.Message = "User not created due to email service issue.";
+                        return rtn;
+                    }
+                    await _userManager.AddToRoleAsync(appUser, "User");
+                    transaction.Commit();
+                    rtn.Message = "\"User created and send the email for account confirmation";
+                    rtn.Status = DomainLayer.Enums.Status.Success;
+                    return rtn;
+                }
+                else
+                {
+                    var message = string.Join(", ", userResult.Errors.Select(x => x.Description));
+                    rtn.Message = message;
+                    return rtn;
+                }
+            }
+            catch (Exception ex)
+            {
+                rtn.Message = ex.Message;
+                return rtn;
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [Route("RegisterAdminUser")]
+        public async Task<IActionResult> RegisterAdminUser([FromBody] AdminRegisterModel user)
         {
             try
             {
@@ -114,7 +199,6 @@ namespace API_Controller_Demo.Controllers
                 {
                     return BadRequest("User not found");
                 }
-                // Model validations
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState);
@@ -128,11 +212,11 @@ namespace API_Controller_Demo.Controllers
                 }
 
                 using var transaction = await _context.Database.BeginTransactionAsync();
-                var appUser = new ApplicationUser
+                ApplicationUser appUser = new ApplicationUser
                 {
                     UserName = user.Username,
                     FirstName = user.Username,
-
+                    RegistrationDate = DateTime.UtcNow,
                     Email = user.Email,
                 };
                 var userResult = await _userManager.CreateAsync(appUser, user.Password);
@@ -163,6 +247,18 @@ namespace API_Controller_Demo.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        private static ApplicationUser ConvertToApplicationUser(UserRegisterModel user)
+        {
+            return new ApplicationUser
+            {
+                UserName = user.Username,
+                FirstName = user.Username,
+                RegistrationDate = DateTime.UtcNow,
+                PhoneNumber = user.Phone,
+                Email = user.Email,
+            };
         }
     }
 }

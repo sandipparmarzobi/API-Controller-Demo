@@ -1,6 +1,6 @@
 ﻿namespace DomainLayer.Enums
 {
-   public enum MovieGenre
+    public enum MovieGenre
     {
         Action = 0,
         Comedy = 1,
@@ -14,5 +14,10 @@
         Animation = 9,
         War = 10,
         Documentary = 11
+    }
+    public enum Status
+    {
+        Success,
+        Failed
     }
 }

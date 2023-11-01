@@ -77,7 +77,7 @@ namespace API_Controller_Demo.Controllers.Ignore
                 var userResult = await _userManager.CreateAsync(appUser, user.Password);
                 if (userResult.Succeeded)
                 {
-                    if (!await _roleManager.RoleExistsAsync(user.Role))
+                    if (!await _roleManager.RoleExistsAsync("User"))
                     {
                         transaction.Rollback();
                         return BadRequest("Provided Role does not exist.");
@@ -89,7 +89,7 @@ namespace API_Controller_Demo.Controllers.Ignore
                         transaction.Rollback();
                         return BadRequest("User not created due to email service issue.");
                     }
-                    await _userManager.AddToRoleAsync(appUser, user.Role);
+                    await _userManager.AddToRoleAsync(appUser, "User");
                     transaction.Commit();
                     return Ok("User created and send the email for account confirmation");
                 }
