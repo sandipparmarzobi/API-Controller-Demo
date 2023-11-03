@@ -111,7 +111,6 @@ namespace API_Controller_Demo.Controllers
                 {
                     rtn.Message = "Invalid Email or Password";
                     return rtn;
-
                 }
             }
             catch (Exception ex)
@@ -188,7 +187,7 @@ namespace API_Controller_Demo.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPost]
         [Route("RegisterAdminUser")]
         public async Task<IActionResult> RegisterAdminUser([FromBody] AdminRegisterModel user)
@@ -215,7 +214,7 @@ namespace API_Controller_Demo.Controllers
                 ApplicationUser appUser = new ApplicationUser
                 {
                     UserName = user.Username,
-                    FirstName = user.Username,
+                    FullName = user.FullName,
                     RegistrationDate = DateTime.UtcNow,
                     Email = user.Email,
                 };
@@ -254,7 +253,7 @@ namespace API_Controller_Demo.Controllers
             return new ApplicationUser
             {
                 UserName = user.Username,
-                FirstName = user.Username,
+                FullName = user.FullName,
                 RegistrationDate = DateTime.UtcNow,
                 PhoneNumber = user.Phone,
                 Email = user.Email,

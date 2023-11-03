@@ -70,8 +70,7 @@ namespace API_Controller_Demo.Controllers.Ignore
                 var appUser = new ApplicationUser
                 {
                     UserName = user.Username,
-                    FirstName = user.Username,
-
+                    FullName = user.FullName,
                     Email = user.Email,
                 };
                 var userResult = await _userManager.CreateAsync(appUser, user.Password);

@@ -17,10 +17,16 @@ namespace NewDemoProject.Model
         [DataType(DataType.Password)]   
         public string Password { get; set; }
 
-        [Required(ErrorMessage = "FirstName is required")]
+        [DataType(DataType.Password)]
+        //[Required(ErrorMessage = "ConfirmPassword is required")]
+        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        public string ConfirmPassword { get; set; }
+
+        [Required(ErrorMessage = "FullName is required")]
         public string FullName { get; set; }
 
         [Required(ErrorMessage = "Phone is required")]
+        [RegularExpression(@"^\d{10}$", ErrorMessage = "Please enter a 10-digit phone number.")]
         public string Phone { get; set; }
 
     }

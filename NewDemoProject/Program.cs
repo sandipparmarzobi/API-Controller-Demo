@@ -1,3 +1,4 @@
+using API_Controller_Demo;
 using ApplicationLayer.Interface;
 using ApplicationLayer.Services;
 using DomainLayer.Entities;
@@ -14,6 +15,7 @@ using URF.Core.Abstractions;
 using URF.Core.Abstractions.Trackable;
 using URF.Core.EF;
 using URF.Core.EF.Trackable;
+using AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,13 +24,19 @@ builder.Services.AddDbContext<MyDemoDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MyDemoDBContext") ?? throw new InvalidOperationException("Connection string 'MyDemoDBContext' not found.")));
 // Inject DBContext class for UnitOfWork
 builder.Services.AddScoped<DbContext, MyDemoDBContext>();
-
 // Dependancy Injection for Unit Of Work and Repository.
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ITrackableRepository<User>, TrackableRepository<User>>();
 builder.Services.AddScoped<IUserService, UserService>();
-//builder.Services.AddScoped<IEmailService, EmailService  >();
 
+// Movie Services
+builder.Services.AddScoped<ITrackableRepository<Movie>, TrackableRepository<Movie>>();
+builder.Services.AddScoped<IMovieService, MovieService>();
+
+//builder.Services.AddScoped<IEmailService, EmailService  >();
+// Resolve the IMapper instance
+
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 // Dependancy Injection for Email Service
 builder.Services.AddSingleton<IEmailService, EmailService>(sp =>
 {

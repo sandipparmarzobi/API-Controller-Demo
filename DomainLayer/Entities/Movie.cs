@@ -1,9 +1,10 @@
 ﻿using DomainLayer.Enums;
 using System.ComponentModel.DataAnnotations;
+using URF.Core.EF.Trackable;
 
 namespace DomainLayer.Entities
 {
-    public class Movie
+    public class Movie : Entity
     {
         [Key]
         public Guid Id { get; set; }
