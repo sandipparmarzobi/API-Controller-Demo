@@ -5,11 +5,14 @@ using System;
 
 namespace API_Controller_Demo
 {
+    //SP: Custom class with map dto with actual Entity
     public class AutoMapperProfile : Profile
     {
         public AutoMapperProfile()
         {
-            CreateMap<MovieModel, Movie>(); // Map PersonDto to Person
+            CreateMap<MovieDto, Movie>(); 
+            CreateMap<TheaterDto, Theater>();
+            CreateMap<ShowTimeDto, ShowTime>();
         }
     }
 }

@@ -1,14 +1,13 @@
-﻿using DomainLayer.Enums;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using URF.Core.EF.Trackable;
 
 namespace DomainLayer.Entities
 {
-    public class SeatBooking
+    public class SeatBooking : Entity
     {
         [Key]
         public Guid Id { get; set; }
         public int SeatNumber { get; set; }
-        public bool IsReserved { get; set; }
         public Guid? BookingId { get; set; }
         public Booking? Booking { get; set; }
         public Guid? SeatId { get; set; }

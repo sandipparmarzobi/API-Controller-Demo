@@ -1,10 +1,8 @@
 ﻿using DomainLayer.Entities;
 using DomainLayer.Enums;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System.Reflection;
 
 namespace InfrastructureLayer.Data
 {

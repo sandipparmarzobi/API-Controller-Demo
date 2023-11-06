@@ -1,16 +1,11 @@
-﻿using ApplicationLayer.Interface;
+﻿using API_Controller_Demo.Model;
+using ApplicationLayer.Interface;
 using AutoMapper;
 using DomainLayer.Entities;
-using InfrastructureLayer.Data;
-using InfrastructureLayer.Helper;
+using DomainLayer.Enums;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using NewDemoProject.Model;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using URF.Core.Abstractions;
 
 namespace API_Controller_Demo.Controllers
@@ -30,58 +25,120 @@ namespace API_Controller_Demo.Controllers
             _unitOfWork = unitOfWork;
         }
 
+        [Authorize(Roles = "User,Admin")]
         [HttpGet]
         [Route("Get")]
-        public async Task<IActionResult> Get()
+        public async Task<ActionResultData> Get()
         {
-            return Ok("Get Movie");
+            var rtn = new ActionResultData();
+            try
+            {
+                var movies =  _movieServie.FindAll();
+                rtn.Data = movies;
+                rtn.Status = Status.Success;
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                rtn.Status = Status.Failed;
+                rtn.Message=ex.Message;
+                return rtn;
+            }
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        [Route("AddNewMovie")]
-        public async Task<IActionResult> Add([FromBody] MovieModel movie)
+        [Route("Add")]
+        public async Task<ActionResultData> Add([FromBody] MovieDto movie)
         {
-            var movieEntity = _mapper.Map<Movie>(movie);
-            _movieServie.Insert(movieEntity);
-            await _unitOfWork.SaveChangesAsync();
-            return Ok("Movie Added Successfully");
+            var rtn = new ActionResultData();
+            try
+            {
+                var movieEntity = _mapper.Map<Movie>(movie);
+                _movieServie.Insert(movieEntity);
+                await _unitOfWork.SaveChangesAsync();
+                rtn.Status = Status.Success;
+                rtn.Message = "Movie Added Successfully";
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                rtn.Status = Status.Failed;
+                rtn.Message += ex.Message;
+                return rtn;
+            }
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPut]
         [Route("Update")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] MovieModel updatedMovie)
+        public async Task<ActionResultData> Update(Guid id, [FromBody] MovieDto updatedMovie)
         {
-            if (updatedMovie == null)
+            var rtn = new ActionResultData();
+            try
             {
-                return BadRequest("Invalid request data.");
+                if (updatedMovie == null)
+                {
+                    rtn.Status = Status.Failed;
+                    rtn.Message = "Invalid request data.";
+                    return rtn;
+                }
+                var existingMovie = _movieServie.GetById(id);
+                if (existingMovie == null)
+                {
+                    rtn.Status = Status.Failed;
+                    rtn.Message = "Movie not found.";
+                    return rtn;
+                }
+                existingMovie.Title = updatedMovie.Title;
+                existingMovie.ReleaseDate = updatedMovie.ReleaseDate;
+                existingMovie.Genre = Enum.Parse<MovieGenre>(updatedMovie.Genre);
+                existingMovie.Description = updatedMovie.Description;
+                existingMovie.Duration = updatedMovie.Duration;
+                existingMovie.Director = updatedMovie.Director;
+                existingMovie.PosterURL = updatedMovie.PosterURL;
+                existingMovie.TrailerURL = updatedMovie.TrailerURL;
+                _movieServie.Update(existingMovie);
+                await _unitOfWork.SaveChangesAsync();
+                rtn.Status = Status.Success;
+                rtn.Message = "Movie Updated Successfully";
+                return rtn;
             }
-
-            var existingMovie = _movieServie.GetById(id);
-            if (existingMovie == null)
+            catch (Exception ex)
             {
-                return NotFound(); // Resource not found
+                rtn.Status = Status.Failed;
+                rtn.Message += ex.Message;
+                return rtn;
             }
-            var New= _mapper.Map(existingMovie,updatedMovie);
-            var movieEntity = _mapper.Map<Movie>(New);
-            _movieServie.Update(movieEntity);
-            await _unitOfWork.SaveChangesAsync();
-            return Ok("Movie Updated Successfully");
         }
 
         [Authorize(Roles = "Admin")]
         [HttpDelete]
         [Route("Delete")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<ActionResultData> Delete(Guid id)
         {
-            var movieItem = _movieServie.GetById(id);
-            if (movieItem != null)
+            var rtn = new ActionResultData();
+            try
             {
-                _movieServie.Delete(movieItem);
+                var existingMovie = _movieServie.GetById(id);
+                if (existingMovie == null)
+                {
+                    rtn.Status = Status.Failed;
+                    rtn.Message = "Movie not found.";
+                    return rtn;
+                }
+                _movieServie.Delete(existingMovie);
                 await _unitOfWork.SaveChangesAsync();
+                rtn.Status = Status.Success;
+                rtn.Message = "Movie Deleted Successfully.";
+                return rtn;
             }
-            return Ok("Movie Deleted Successfully");
+            catch (Exception ex)
+            {
+                rtn.Status  = Status.Failed;
+                rtn.Message=ex.Message;
+                return rtn;
+            }
         }
     }
 }

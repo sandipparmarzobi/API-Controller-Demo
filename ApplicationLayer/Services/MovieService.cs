@@ -1,13 +1,13 @@
 ﻿using ApplicationLayer.Interface;
+using ApplicationLayer.Repository;
 using DomainLayer.Entities;
-using URF.Core.Abstractions.Trackable;
-using URF.Core.Services;
 
 namespace ApplicationLayer.Services
 {
-    public class MovieService : Service<Movie>, IMovieService
+    public class MovieService : ServiceX<Movie>, IMovieService
     {
-        public MovieService(ITrackableRepository<Movie> repository) : base(repository)
+
+        public MovieService(IRepositoryX<Movie> repository) : base(repository)
         {
         }
 

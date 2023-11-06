@@ -1,9 +1,9 @@
-﻿using DomainLayer.Enums;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using URF.Core.EF.Trackable;
 
 namespace DomainLayer.Entities
 {
-    public class Reviews
+    public class Reviews : Entity
     {
         [Key]
         public Guid Id { get; set; }

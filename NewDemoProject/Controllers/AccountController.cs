@@ -1,13 +1,11 @@
 ﻿using API_Controller_Demo.Model;
 using ApplicationLayer.Interface;
-using Azure;
 using DomainLayer.Entities;
 using InfrastructureLayer.Data;
 using InfrastructureLayer.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using NewDemoProject.Model;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -36,7 +34,7 @@ namespace API_Controller_Demo.Controllers
             _emailService = emailService;
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [Route("CreateRole")]
         public async Task<IActionResult> CreateRole([FromBody] string roleName)
@@ -60,7 +58,7 @@ namespace API_Controller_Demo.Controllers
 
         [HttpPost]
         [Route("Login")]
-        public async Task<ActionResultData> Login([FromBody] LoginModel model)
+        public async Task<ActionResultData> Login([FromBody] LoginDto model)
         {
             var rtn = new ActionResultData();
             try
@@ -99,7 +97,7 @@ namespace API_Controller_Demo.Controllers
                         var expiresInMinutes = model.RememberMe ? 7 * 24 * 60 : 15;
                         expirationMinutes = expiresInMinutes;
                     }
-                    // Generate a JWT token using the JwtTokenHelper.
+                    // Generate a JWT token using the JwtTokenHelper class.
                     string token = _jwtTokenHelper.GenerateToken(claimsIdentity, expirationMinutes);
 
                     rtn.Message = "\"User created and send the email for account confirmation";
@@ -122,7 +120,7 @@ namespace API_Controller_Demo.Controllers
 
         [HttpPost]
         [Route("RegisterNormalUser")]
-        public async Task<ActionResultData> RegisterNormalUser([FromBody] UserRegisterModel user)
+        public async Task<ActionResultData> RegisterNormalUser([FromBody] UserRegisterDto user)
         {
             var rtn = new ActionResultData();
             try
@@ -134,9 +132,7 @@ namespace API_Controller_Demo.Controllers
                 }
                 if (!ModelState.IsValid)
                 {
-                    var errorList = (from item in ModelState.Values
-                                     from error in item.Errors
-                                     select error.ErrorMessage).ToString();
+                    string? errorList = GetModelErrors();
                     rtn.Message = errorList;
                     return rtn;
                 }
@@ -169,7 +165,7 @@ namespace API_Controller_Demo.Controllers
                     }
                     await _userManager.AddToRoleAsync(appUser, "User");
                     transaction.Commit();
-                    rtn.Message = "\"User created and send the email for account confirmation";
+                    rtn.Message = "User created and send the email for account confirmation";
                     rtn.Status = DomainLayer.Enums.Status.Success;
                     return rtn;
                 }
@@ -187,27 +183,31 @@ namespace API_Controller_Demo.Controllers
             }
         }
 
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [Route("RegisterAdminUser")]
-        public async Task<IActionResult> RegisterAdminUser([FromBody] AdminRegisterModel user)
+        public async Task<ActionResultData> RegisterAdminUser([FromBody] AdminRegisterDto user)
         {
+            var rtn = new ActionResultData();
             try
             {
                 if (user == null)
                 {
-                    return BadRequest("User not found");
+                    rtn.Message = "User not found";
+                    return rtn;
                 }
                 if (!ModelState.IsValid)
                 {
-                    return BadRequest(ModelState);
+                    string? errorList = GetModelErrors();
+                    rtn.Message = errorList;
+                    return rtn;
                 }
                 // To check duplicate email or not
                 var existingUser = await _userManager.FindByEmailAsync(user.Email);
                 if (existingUser != null)
                 {
-                    ModelState.AddModelError("Email", "The email address is already in use. Please choose a different email address.");
-                    return BadRequest(new { errors = ModelState });
+                    rtn.Message = "The email address is already in use. Please choose a different email address.";
+                    return rtn;
                 }
 
                 using var transaction = await _context.Database.BeginTransactionAsync();
@@ -224,31 +224,38 @@ namespace API_Controller_Demo.Controllers
                     if (!await _roleManager.RoleExistsAsync(user.Role))
                     {
                         transaction.Rollback();
-                        return BadRequest("Provided Role does not exist.");
+                        rtn.Message = "Provided Role does not exist.";
+                        return rtn;
                     }
                     var token = await _userManager.GenerateEmailConfirmationTokenAsync(appUser);
                     var tokenLink = Url.Action("ConfirmEmail", "User", new { userId = appUser.Id, token }, Request.Scheme);
                     if (!_emailService.SendEmail("sandip.parmar@zobiwebsolutions.com", string.Empty, "Email Confirmation", tokenLink))
                     {
                         transaction.Rollback();
-                        return BadRequest("User not created due to email service issue.");
+                        rtn.Message = "User not created due to email service issue.";
+                        return rtn;
                     }
                     await _userManager.AddToRoleAsync(appUser, user.Role);
                     transaction.Commit();
-                    return Ok("User created and send the email for account confirmation");
+                    rtn.Message = "User created and send the email for account confirmation";
+                    rtn.Status = DomainLayer.Enums.Status.Success;
+                    return rtn;
                 }
                 else
                 {
-                    return BadRequest(userResult.Errors);
+                    var message = string.Join(", ", userResult.Errors.Select(x => x.Description));
+                    rtn.Message = message;
+                    return rtn;
                 }
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                rtn.Message = ex.Message;
+                return rtn;
             }
         }
 
-        private static ApplicationUser ConvertToApplicationUser(UserRegisterModel user)
+        private static ApplicationUser ConvertToApplicationUser(UserRegisterDto user)
         {
             return new ApplicationUser
             {
@@ -258,6 +265,13 @@ namespace API_Controller_Demo.Controllers
                 PhoneNumber = user.Phone,
                 Email = user.Email,
             };
+        }
+
+        private string? GetModelErrors()
+        {
+            return (from item in ModelState.Values
+                    from error in item.Errors
+                    select error.ErrorMessage).ToString();
         }
     }
 }

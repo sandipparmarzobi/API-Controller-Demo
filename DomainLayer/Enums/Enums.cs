@@ -1,4 +1,6 @@
-﻿namespace DomainLayer.Enums
+﻿using System.Text.Json.Serialization;
+
+namespace DomainLayer.Enums
 {
     public enum MovieGenre
     {
@@ -15,6 +17,7 @@
         War = 10,
         Documentary = 11
     }
+
     public enum Status
     {
         Success,

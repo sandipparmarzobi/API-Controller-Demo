@@ -1,5 +1,6 @@
 using API_Controller_Demo;
 using ApplicationLayer.Interface;
+using ApplicationLayer.Repository;
 using ApplicationLayer.Services;
 using DomainLayer.Entities;
 using InfrastructureLayer.Data;
@@ -7,7 +8,6 @@ using InfrastructureLayer.Helper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -15,28 +15,40 @@ using URF.Core.Abstractions;
 using URF.Core.Abstractions.Trackable;
 using URF.Core.EF;
 using URF.Core.EF.Trackable;
-using AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
 //Add DBContext
 builder.Services.AddDbContext<MyDemoDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("MyDemoDBContext") ?? throw new InvalidOperationException("Connection string 'MyDemoDBContext' not found.")));
+
 // Inject DBContext class for UnitOfWork
 builder.Services.AddScoped<DbContext, MyDemoDBContext>();
+
 // Dependancy Injection for Unit Of Work and Repository.
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+//SP: Dot net core ITrackableRepository Service (Provided By Dotnet Service).
 builder.Services.AddScoped<ITrackableRepository<User>, TrackableRepository<User>>();
 builder.Services.AddScoped<IUserService, UserService>();
 
-// Movie Services
-builder.Services.AddScoped<ITrackableRepository<Movie>, TrackableRepository<Movie>>();
+//SP: Extend with Custom IRepositoryX Service with ITrackableRepository service. (Extend with Custom Service + Provided By Dotnet Service).
+builder.Services.AddScoped<IRepositoryX<Movie>, RepositoryX<Movie>>();
 builder.Services.AddScoped<IMovieService, MovieService>();
+builder.Services.AddScoped<IRepositoryX<Theater>, RepositoryX<Theater>>();
+builder.Services.AddScoped<ITheaterService, TheaterService>();
+builder.Services.AddScoped<IRepositoryX<ShowTime>, RepositoryX<ShowTime>>();
+builder.Services.AddScoped<IShowTimeService, ShowTimeService>();
+builder.Services.AddScoped<IRepositoryX<Seats>, RepositoryX<Seats>>();
+builder.Services.AddScoped<ISeatService, SeatService>();
+builder.Services.AddScoped<IRepositoryX<Booking>, RepositoryX<Booking>>();
+builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IRepositoryX<SeatBooking>, RepositoryX<SeatBooking>>();
+builder.Services.AddScoped<ISeatBookingService, SeatBookingService>();
 
-//builder.Services.AddScoped<IEmailService, EmailService  >();
-// Resolve the IMapper instance
-
+// Add AutoMapper Service
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
+
 // Dependancy Injection for Email Service
 builder.Services.AddSingleton<IEmailService, EmailService>(sp =>
 {
@@ -51,16 +63,11 @@ builder.Services.AddSingleton<IEmailService, EmailService>(sp =>
     return new EmailService(smtpServer, smtpPort, smtpUsername, smtpPassword, senderEmail,logger);
 });
 
-// Add services to the container.
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
 //Dependancy Injection For User and Role 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(option => {
     option.User.RequireUniqueEmail = true;
     option.SignIn.RequireConfirmedAccount = true;
-    
+
 }).AddEntityFrameworkStores<MyDemoDBContext>().AddDefaultTokenProviders();
 // JWT Token Service
 builder.Services.AddAuthentication(cfg =>
@@ -80,6 +87,22 @@ builder.Services.AddAuthentication(cfg =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"])),
     };
 });
+
+// For JWTTokenHelper Injection
+builder.Services.AddSingleton(sp =>
+{
+    var secretKey = builder.Configuration["JWT:Secret"];
+    var issuer = builder.Configuration["JWT:ValidIssuer"];
+    var audience = builder.Configuration["JWT:ValidAudience"];
+    var tokenExpirationMinutes = 60;
+
+    return new JwtTokenHelper(secretKey, issuer, audience, tokenExpirationMinutes);
+});
+
+// Add services to the container.
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 // For Swagger Authorize button
 builder.Services.AddSwaggerGen(c =>
@@ -106,18 +129,6 @@ builder.Services.AddSwaggerGen(c =>
             }
         });
 });
-
-// For JWTTokenHelper Injection
-builder.Services.AddSingleton(sp =>
-{
-    var secretKey = builder.Configuration["JWT:Secret"]; 
-    var issuer = builder.Configuration["JWT:ValidIssuer"];
-    var audience = builder.Configuration["JWT:ValidAudience"]; 
-    var tokenExpirationMinutes = 60; 
-
-    return new JwtTokenHelper(secretKey, issuer, audience, tokenExpirationMinutes);
-});
-
 
 var app = builder.Build();
 app.UseCors(x => x

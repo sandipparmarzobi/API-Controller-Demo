@@ -1,10 +1,15 @@
-﻿using DomainLayer.Enums;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using URF.Core.EF.Trackable;
 
 namespace DomainLayer.Entities
 {
-    public class Booking
+    public class Booking : Entity
     {
+        public Booking()
+        {
+            BookingDate = DateTime.UtcNow;
+        }
+
         [Key]
         public Guid Id { get; set; }
         public int TotalTicket { get; set; }

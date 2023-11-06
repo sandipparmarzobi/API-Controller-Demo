@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using URF.Core.EF.Trackable;
 
 namespace DomainLayer.Entities
 {
-    public class Theater
+    public class Theater : Entity
     {
         [Key]
         public Guid Id { get; set; }

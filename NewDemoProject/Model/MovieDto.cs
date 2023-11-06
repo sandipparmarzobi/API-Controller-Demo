@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace NewDemoProject.Model
 {
-    public class MovieModel
+    public class MovieDto
     {
 
         [Required]

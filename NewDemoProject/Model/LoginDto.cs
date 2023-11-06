@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace NewDemoProject.Model
 {
-    public class LoginModel
+    public class LoginDto
     {
 
         [Required]
