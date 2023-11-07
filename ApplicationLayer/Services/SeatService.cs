@@ -1,7 +1,6 @@
 ﻿using ApplicationLayer.Interface;
 using ApplicationLayer.Repository;
 using DomainLayer.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace ApplicationLayer.Services
 {

@@ -145,8 +145,43 @@ namespace ApplicationLayer.Services
         public async Task DeleteBooking(Guid id)
         {
             var existingBooking = FindAsync(id).Result ?? throw new Exception("Booking is not found");
-            Delete(existingBooking);
-            await _unitOfWork.SaveChangesAsync();
+            var seatBooking = _seatBookingService.FindSeatBookingByBookingId(existingBooking.Id);
+            if (seatBooking != null && seatBooking.Count > 0)
+            {
+                foreach (var item in seatBooking)
+                {
+                    {
+                        item.Seats.IsReserved = false;
+                        _seatService.Update(item.Seats);
+                        _seatBookingService.Delete(item);
+                    }
+                }
+                Delete(existingBooking);
+                await _unitOfWork.SaveChangesAsync();
+            }
+        }
+
+        public async Task CancelBooking(Guid id)
+        {
+            var existingBooking = FindAsync(id).Result ?? throw new Exception("Booking is not found");
+            var seatBooking = _seatBookingService.FindSeatBookingByBookingId(existingBooking.Id);
+            if (seatBooking != null && seatBooking.Count > 0)
+            {
+                foreach (var item in seatBooking)
+                {
+                    {
+                         item.Seats.IsReserved = false;
+                        _seatService.Update(item.Seats);
+                    }
+                }
+                existingBooking.BookingStatus = DomainLayer.Enums.BookingStatus.Cancelled;
+                Update(existingBooking);
+                await _unitOfWork.SaveChangesAsync();
+            }
+            else
+            {
+                throw new Exception("Seat Booking Not found");
+            }
         }
     }
 }

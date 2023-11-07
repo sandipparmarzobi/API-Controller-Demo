@@ -1,4 +1,3 @@
-using DomainLayer.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace ApplicationLayer.DTOs

@@ -3,7 +3,6 @@ using ApplicationLayer.Interface;
 using ApplicationLayer.Repository;
 using AutoMapper;
 using DomainLayer.Entities;
-using DomainLayer.Enums;
 using URF.Core.Abstractions;
 
 namespace ApplicationLayer.Services

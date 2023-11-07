@@ -1,7 +1,6 @@
 ﻿using ApplicationLayer.Interface;
 using ApplicationLayer.Repository;
 using DomainLayer.Entities;
-using Microsoft.EntityFrameworkCore;
 
 namespace ApplicationLayer.Services
 {
@@ -10,6 +9,11 @@ namespace ApplicationLayer.Services
 
         public SeatBookingService(IRepositoryX<SeatBooking> repository) : base(repository)
         {
+        }
+
+        public List<SeatBooking> FindSeatBookingByBookingId(Guid BookingId)
+        {
+            return Repository.Queryable().Where(x => x.BookingId == BookingId).ToList();
         }
     }
 }

@@ -1,11 +1,7 @@
 ﻿using ApplicationLayer.Interface;
-using DomainLayer.Entities;
-using System.Net.Mail;
-using System.Net;
-using URF.Core.Abstractions.Trackable;
-using URF.Core.Services;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using System.Net;
+using System.Net.Mail;
 
 namespace ApplicationLayer.Services
 {

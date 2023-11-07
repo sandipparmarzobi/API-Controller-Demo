@@ -23,4 +23,10 @@ namespace DomainLayer.Enums
         Success,
         Failed
     }
+
+    public enum BookingStatus
+    {
+        Confirmed,
+        Cancelled
+    }
 }

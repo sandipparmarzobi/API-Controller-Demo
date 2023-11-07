@@ -28,6 +28,12 @@ namespace InfrastructureLayer.Data
             .Property(d => d.Genre)
             .HasConversion(new EnumToStringConverter<MovieGenre>());
 
+            // BookingStatus
+            modelBuilder
+            .Entity<Booking>()
+            .Property(d => d.BookingStatus)
+            .HasConversion(new EnumToStringConverter<BookingStatus>());
+
             #region Application User
 
             modelBuilder.Entity<ApplicationUser>()

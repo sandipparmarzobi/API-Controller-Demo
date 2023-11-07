@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using DomainLayer.Enums;
+using System.ComponentModel.DataAnnotations;
 using URF.Core.EF.Trackable;
 
 namespace DomainLayer.Entities
@@ -8,6 +9,7 @@ namespace DomainLayer.Entities
         public Booking()
         {
             BookingDate = DateTime.UtcNow;
+            BookingStatus = BookingStatus.Confirmed;
         }
 
         [Key]
@@ -15,6 +17,7 @@ namespace DomainLayer.Entities
         public int TotalTicket { get; set; }
         public decimal TotalPrice { get; set; }
         public DateTime BookingDate { get; set; }
+        public BookingStatus BookingStatus { get; set; }
         public Guid? UserId { get; set; }
         public ApplicationUser? User { get; set; }
         public Guid? MovieId { get; set; }

@@ -3,9 +3,7 @@ using ApplicationLayer.Interface;
 using ApplicationLayer.Repository;
 using AutoMapper;
 using DomainLayer.Entities;
-using DomainLayer.Enums;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using URF.Core.Abstractions;
 

@@ -1,12 +1,8 @@
 ﻿using ApplicationLayer.DTOs;
 using ApplicationLayer.Interface;
-using AutoMapper;
-using DomainLayer.Entities;
 using DomainLayer.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.IdentityModel.Tokens.Jwt;
-using URF.Core.Abstractions;
 
 namespace API_Controller_Demo.Controllers
 {
