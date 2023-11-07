@@ -27,7 +27,7 @@ namespace ApplicationLayer.Services
 
         public async Task DeleteMovie(Guid id)
         {
-            var existingMovie = GetById(id) ?? throw new Exception("Movie not found.");
+            var existingMovie = FindById(id) ?? throw new Exception("Movie not found.");
             Delete(existingMovie);
             await _unitOfWork.SaveChangesAsync();
         }
@@ -38,7 +38,7 @@ namespace ApplicationLayer.Services
             {
                 throw new Exception("Invalid request data.");
             }
-            var existingMovie = GetById(id) ?? throw new Exception("Movie not found.");
+            var existingMovie = FindById(id) ?? throw new Exception("Movie not found.");
             existingMovie.Title = updatedMovie.Title;
             existingMovie.ReleaseDate = updatedMovie.ReleaseDate;
             existingMovie.Genre = Enum.Parse<MovieGenre>(updatedMovie.Genre);
@@ -49,16 +49,6 @@ namespace ApplicationLayer.Services
             existingMovie.TrailerURL = updatedMovie.TrailerURL;
             Update(existingMovie);
             await _unitOfWork.SaveChangesAsync();
-        }
-
-        public Movie? GetById(Guid id)
-        {
-            return Repository.Queryable().FirstOrDefault(x => x.Id == id);
-        }
-
-        public Movie? GetByName(string title)
-        {
-            return Repository.Queryable().FirstOrDefault(x => x.Title == title);
         }
     }
 }

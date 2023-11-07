@@ -19,9 +19,9 @@ namespace ApplicationLayer.DTOs
         public DateTime EndTime { get; set; }
         
         [Required]
-        public Guid? MovieId { get; set; }
+        public Guid MovieId { get; set; }
 
         [Required]
-        public Guid? TheaterId { get; set; }
+        public Guid TheaterId { get; set; }
     }
 }

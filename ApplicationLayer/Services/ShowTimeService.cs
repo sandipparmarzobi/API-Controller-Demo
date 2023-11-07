@@ -32,8 +32,8 @@ namespace ApplicationLayer.Services
 
         public async Task AddShowTime(ShowTimeDto showtime)
         {
-            var theator = await _theaterServie.FindAsync(showtime.TheaterId) ?? throw new Exception("Theator is not found");
-            var movie = await _movieServie.FindAsync(showtime.MovieId) ?? throw new Exception("Movie is not found");
+            var theator = _theaterServie.FindById(showtime.TheaterId) ?? throw new Exception("Theator is not found");
+            var movie = _movieServie.FindById(showtime.MovieId) ?? throw new Exception("Movie is not found");
 
             var showtimeEntity = _mapper.Map<ShowTime>(showtime);
             Insert(showtimeEntity);
@@ -54,9 +54,9 @@ namespace ApplicationLayer.Services
         {
             if (updatedshowtime != null)
             {
-                var existingshowtime = await FindAsync(id) ?? throw new Exception("Showtime not found.");
-                var theator = await _theaterServie.FindAsync(updatedshowtime.TheaterId) ?? throw new Exception("Theator is not found");
-                var movie = await _movieServie.FindAsync(updatedshowtime.MovieId) ?? throw new Exception("Movie is not found");
+                var existingshowtime = FindById(id) ?? throw new Exception("Showtime not found.");
+                var theator = _theaterServie.FindById(updatedshowtime.TheaterId) ?? throw new Exception("Theator is not found");
+                var movie =  _movieServie.FindById(updatedshowtime.MovieId) ?? throw new Exception("Movie is not found");
 
                 var existingSeats = _seatService.FindSeatsbyTheatorAndShowTime(theator.Id,existingshowtime.Id);
                 foreach (var item in existingSeats)
@@ -92,7 +92,7 @@ namespace ApplicationLayer.Services
 
         public async Task DeleteShowTime(Guid id)
         {
-            var existingShowtime = await FindAsync(id) ?? throw new Exception("ShowTime not found.");
+            var existingShowtime = FindById(id) ?? throw new Exception("ShowTime not found.");
             Delete(existingShowtime);
             await _unitOfWork.SaveChangesAsync();
         }

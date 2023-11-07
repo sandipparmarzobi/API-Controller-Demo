@@ -40,7 +40,7 @@ namespace ApplicationLayer.Services
         {
             if (updatedReview != null)
             {
-                var existingReview = await FindAsync(id) ?? throw new Exception("Review not found.");
+                var existingReview = FindById(id) ?? throw new Exception("Review not found.");
                 existingReview.UserId = updatedReview.UserId;
                 existingReview.MovieId = updatedReview.MovieId;
                 existingReview.Ratting = updatedReview.Ratting;
@@ -57,7 +57,7 @@ namespace ApplicationLayer.Services
 
         public async Task DeleteReview(Guid id)
         {
-            var existingReview = await FindAsync(id) ?? throw new Exception("Review not found.");
+            var existingReview = FindById(id) ?? throw new Exception("Review not found.");
             Delete(existingReview);
             await _unitOfWork.SaveChangesAsync();
         }

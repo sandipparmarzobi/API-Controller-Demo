@@ -17,5 +17,10 @@ namespace ApplicationLayer.Repository
         {
            return repository.FindAll();
         }
+
+        public TEntity? FindById(Guid id)
+        {
+            return repository.FindById(id);
+        }
     }
 }

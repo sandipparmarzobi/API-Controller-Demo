@@ -144,7 +144,7 @@ namespace ApplicationLayer.Services
 
         public async Task DeleteBooking(Guid id)
         {
-            var existingBooking = FindAsync(id).Result ?? throw new Exception("Booking is not found");
+            var existingBooking = FindById(id) ?? throw new Exception("Booking is not found");
             var seatBooking = _seatBookingService.FindSeatBookingByBookingId(existingBooking.Id);
             if (seatBooking != null && seatBooking.Count > 0)
             {
@@ -163,7 +163,7 @@ namespace ApplicationLayer.Services
 
         public async Task CancelBooking(Guid id)
         {
-            var existingBooking = FindAsync(id).Result ?? throw new Exception("Booking is not found");
+            var existingBooking = FindById(id) ?? throw new Exception("Booking is not found");
             var seatBooking = _seatBookingService.FindSeatBookingByBookingId(existingBooking.Id);
             if (seatBooking != null && seatBooking.Count > 0)
             {

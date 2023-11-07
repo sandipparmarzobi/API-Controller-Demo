@@ -7,21 +7,23 @@ namespace ApplicationLayer.Repository
 {
     public class RepositoryX<TEntity> : TrackableRepository<TEntity>, IRepositoryX<TEntity> where TEntity : class, ITrackable
     {
+        private readonly DbContext _dbContext;
+        private readonly DbSet<TEntity> _dbSet;
         public RepositoryX(DbContext context) : base(context)
         {
-
-        }
-
-        // Example: adding synchronous Find, scope: application-wide
-        public TEntity Find(object[] keyValues, CancellationToken cancellationToken = default)
-        {
-            return this.Context.Find<TEntity>(keyValues) as TEntity;
+            _dbContext = context;
+            _dbSet = _dbContext.Set<TEntity>();
         }
 
         // Method to find all records
         public IEnumerable<TEntity> FindAll()
         {
             return this.Context.Set<TEntity>();
+        }
+
+        public TEntity? FindById(Guid id)
+        {
+            return _dbSet.Find(id);
         }
     }
 }
