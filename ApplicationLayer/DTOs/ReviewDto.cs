@@ -13,9 +13,9 @@ namespace ApplicationLayer.DTOs
         public string Comments { get; set; }
 
         [Required]
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
 
         [Required]
-        public string MovieId { get; set; }
+        public Guid MovieId { get; set; }
     }
 }

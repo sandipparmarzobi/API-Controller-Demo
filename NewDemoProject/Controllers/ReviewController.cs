@@ -14,17 +14,11 @@ namespace API_Controller_Demo.Controllers
     [ApiController]
     public class ReviewController : ControllerBase
     {
-        private readonly IMapper _mapper;
         private readonly IReviewService _reviewService;
-        private readonly IMovieService _movieServie;
-        private readonly IUnitOfWork _unitOfWork;
 
-        public ReviewController(IMapper mapper, IReviewService reviewService, IMovieService movieServie, IUnitOfWork unitOfWork)
+        public ReviewController(IReviewService reviewService)
         {
-            _mapper = mapper;
             _reviewService = reviewService;
-            _movieServie = movieServie;
-            _unitOfWork = unitOfWork;
         }
 
         [Authorize(Roles = "User,Admin")]
@@ -56,28 +50,7 @@ namespace API_Controller_Demo.Controllers
             var rtn = new ActionResultData();
             try
             {
-                var userId = HttpContext.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
-                var username = HttpContext.User.Identity.Name;
-
-                if (userId != review.UserId)
-                {
-                    rtn.Status = Status.Failed;
-                    rtn.Message = "User is not authenticated";
-                    return rtn;
-                }
-
-                var movie = _movieServie.FindAsync(review.MovieId).Result;
-                if (movie == null)
-                {
-                    rtn.Status = Status.Failed;
-                    rtn.Message = "Movie is not found";
-                    return rtn;
-                }
-
-                var reviewEntity = _mapper.Map<Reviews>(review);
-                _reviewService.Insert(reviewEntity);
-
-                await _unitOfWork.SaveChangesAsync();
+                await _reviewService.AddReview(review);
                 rtn.Status = Status.Success;
                 rtn.Message = "Review Added Successfully";
                 return rtn;
@@ -99,28 +72,7 @@ namespace API_Controller_Demo.Controllers
             var rtn = new ActionResultData();
             try
             {
-                if (updatedReview == null)
-                {
-                    rtn.Status = Status.Failed;
-                    rtn.Message = "Invalid request data.";
-                    return rtn;
-                }
-                var existingReview = _reviewService.FindAsync(id).Result;
-                if (existingReview == null)
-                {
-                    rtn.Status = Status.Failed;
-                    rtn.Message = "Review not found.";
-                    return rtn;
-                }
-
-                existingReview.UserId = Guid.Parse(updatedReview.UserId);
-                existingReview.MovieId = Guid.Parse(updatedReview.MovieId);
-                existingReview.Ratting = updatedReview.Ratting;
-                existingReview.Comments = updatedReview.Comments;
-                existingReview.ReviewDate = DateTime.Now;
-
-                _reviewService.Update(existingReview);
-                await _unitOfWork.SaveChangesAsync();
+                await _reviewService.UpdateReview(id, updatedReview);
                 rtn.Status = Status.Success;
                 rtn.Message = "Review Updated Successfully";
                 return rtn;
@@ -141,15 +93,7 @@ namespace API_Controller_Demo.Controllers
             var rtn = new ActionResultData();
             try
             {
-                var existingReview = _reviewService.FindAsync(id).Result;
-                if (existingReview == null)
-                {
-                    rtn.Status = Status.Failed;
-                    rtn.Message = "Review not found.";
-                    return rtn;
-                }
-                _reviewService.Delete(existingReview);
-                await _unitOfWork.SaveChangesAsync();
+                await _reviewService.DeleteReview(id);
                 rtn.Status = Status.Success;
                 rtn.Message = "Review Deleted Successfully.";
                 return rtn;
