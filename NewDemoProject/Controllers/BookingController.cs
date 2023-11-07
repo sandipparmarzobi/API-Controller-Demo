@@ -16,7 +16,6 @@ namespace API_Controller_Demo.Controllers
             _bookingServie = bookingServie;
         }
 
-        [Authorize(Roles = "User,Admin")]
         [HttpGet]
         [Route("Get")]
         public Task<ActionResultData> Get()

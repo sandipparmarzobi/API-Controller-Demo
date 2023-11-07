@@ -20,7 +20,6 @@ namespace API_Controller_Demo.Controllers
            _theaterServie = theaterServie;
         }
 
-        [Authorize(Roles = "User,Admin")]
         [HttpGet]
         [Route("Get")]
         public async Task<ActionResultData> Get()
