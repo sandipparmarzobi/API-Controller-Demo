@@ -1,17 +1,10 @@
-﻿using API_Controller_Demo.Model;
+﻿using ApplicationLayer.DTOs;
 using ApplicationLayer.Interface;
 using AutoMapper;
 using DomainLayer.Entities;
 using DomainLayer.Enums;
-using InfrastructureLayer.Data;
-using InfrastructureLayer.Helper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NewDemoProject.Model;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using URF.Core.Abstractions;
 
 namespace API_Controller_Demo.Controllers
@@ -20,15 +13,11 @@ namespace API_Controller_Demo.Controllers
     [ApiController]
     public class TheaterController : ControllerBase
     {
-        private readonly IMapper _mapper;
         private readonly ITheaterService _theaterServie;
-        private readonly IUnitOfWork _unitOfWork;
 
-        public TheaterController(IMapper mapper, ITheaterService theaterServie, IUnitOfWork unitOfWork)
+        public TheaterController(ITheaterService theaterServie)
         {
-            _mapper = mapper;
-            this._theaterServie = theaterServie;
-            _unitOfWork = unitOfWork;
+           _theaterServie = theaterServie;
         }
 
         [Authorize(Roles = "User,Admin")]
@@ -60,9 +49,7 @@ namespace API_Controller_Demo.Controllers
             var rtn = new ActionResultData();
             try
             {
-                var theaterEntity = _mapper.Map<Theater>(theater);
-                _theaterServie.Insert(theaterEntity);
-                await _unitOfWork.SaveChangesAsync();
+                await _theaterServie.AddTheater(theater);
                 rtn.Status = Status.Success;
                 rtn.Message = "Theater Added Successfully";
                 return rtn;
@@ -83,25 +70,7 @@ namespace API_Controller_Demo.Controllers
             var rtn = new ActionResultData();
             try
             {
-                if (updatedTheater == null)
-                {
-                    rtn.Status = Status.Failed;
-                    rtn.Message = "Invalid request data.";
-                    return rtn;
-                }
-                var existingTheater = _theaterServie.FindAsync(id).Result;
-                if (existingTheater == null)
-                {
-                    rtn.Status = Status.Failed;
-                    rtn.Message = "Theater not found.";
-                    return rtn;
-                }
-                existingTheater.Name = updatedTheater.Name;
-                existingTheater.Location = updatedTheater.Location;
-                existingTheater.Capasity = updatedTheater.Capasity;
-
-                _theaterServie.Update(existingTheater);
-                await _unitOfWork.SaveChangesAsync();
+                await _theaterServie.UpdateTheater(id, updatedTheater);
                 rtn.Status = Status.Success;
                 rtn.Message = "Theater Updated Successfully";
                 return rtn;
@@ -122,15 +91,7 @@ namespace API_Controller_Demo.Controllers
             var rtn = new ActionResultData();
             try
             {
-                var existingTheater = _theaterServie.FindAsync(id).Result;
-                if (existingTheater == null)
-                {
-                    rtn.Status = Status.Failed;
-                    rtn.Message = "Theater not found.";
-                    return rtn;
-                }
-                _theaterServie.Delete(existingTheater);
-                await _unitOfWork.SaveChangesAsync();
+                await _theaterServie.DeleteTheater(id);
                 rtn.Status = Status.Success;
                 rtn.Message = "Theater Deleted Successfully.";
                 return rtn;

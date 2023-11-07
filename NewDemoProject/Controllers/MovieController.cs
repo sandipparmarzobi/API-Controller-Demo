@@ -1,12 +1,8 @@
-﻿using API_Controller_Demo.Model;
+﻿using ApplicationLayer.DTOs;
 using ApplicationLayer.Interface;
-using AutoMapper;
-using DomainLayer.Entities;
 using DomainLayer.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NewDemoProject.Model;
-using URF.Core.Abstractions;
 
 namespace API_Controller_Demo.Controllers
 {
@@ -14,18 +10,13 @@ namespace API_Controller_Demo.Controllers
     [ApiController]
     public class MovieController : ControllerBase
     {
-        private readonly IMapper _mapper;
         private readonly IMovieService _movieServie;
-        private readonly IUnitOfWork _unitOfWork;
 
-        public MovieController(IMapper mapper, IMovieService movieServie, IUnitOfWork unitOfWork)
+        public MovieController(IMovieService movieServie)
         {
-            _mapper = mapper;
-            this._movieServie = movieServie;
-            _unitOfWork = unitOfWork;
+            _movieServie = movieServie;
         }
 
-        [Authorize(Roles = "User,Admin")]
         [HttpGet]
         [Route("Get")]
         public async Task<ActionResultData> Get()
@@ -54,9 +45,7 @@ namespace API_Controller_Demo.Controllers
             var rtn = new ActionResultData();
             try
             {
-                var movieEntity = _mapper.Map<Movie>(movie);
-                _movieServie.Insert(movieEntity);
-                await _unitOfWork.SaveChangesAsync();
+                await _movieServie.AddMovie(movie);
                 rtn.Status = Status.Success;
                 rtn.Message = "Movie Added Successfully";
                 return rtn;
@@ -77,29 +66,7 @@ namespace API_Controller_Demo.Controllers
             var rtn = new ActionResultData();
             try
             {
-                if (updatedMovie == null)
-                {
-                    rtn.Status = Status.Failed;
-                    rtn.Message = "Invalid request data.";
-                    return rtn;
-                }
-                var existingMovie = _movieServie.GetById(id);
-                if (existingMovie == null)
-                {
-                    rtn.Status = Status.Failed;
-                    rtn.Message = "Movie not found.";
-                    return rtn;
-                }
-                existingMovie.Title = updatedMovie.Title;
-                existingMovie.ReleaseDate = updatedMovie.ReleaseDate;
-                existingMovie.Genre = Enum.Parse<MovieGenre>(updatedMovie.Genre);
-                existingMovie.Description = updatedMovie.Description;
-                existingMovie.Duration = updatedMovie.Duration;
-                existingMovie.Director = updatedMovie.Director;
-                existingMovie.PosterURL = updatedMovie.PosterURL;
-                existingMovie.TrailerURL = updatedMovie.TrailerURL;
-                _movieServie.Update(existingMovie);
-                await _unitOfWork.SaveChangesAsync();
+                await _movieServie.UpdateMovie(id, updatedMovie);
                 rtn.Status = Status.Success;
                 rtn.Message = "Movie Updated Successfully";
                 return rtn;
@@ -120,15 +87,7 @@ namespace API_Controller_Demo.Controllers
             var rtn = new ActionResultData();
             try
             {
-                var existingMovie = _movieServie.GetById(id);
-                if (existingMovie == null)
-                {
-                    rtn.Status = Status.Failed;
-                    rtn.Message = "Movie not found.";
-                    return rtn;
-                }
-                _movieServie.Delete(existingMovie);
-                await _unitOfWork.SaveChangesAsync();
+                await _movieServie.DeleteMovie(id);
                 rtn.Status = Status.Success;
                 rtn.Message = "Movie Deleted Successfully.";
                 return rtn;

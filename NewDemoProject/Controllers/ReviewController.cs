@@ -1,18 +1,11 @@
-﻿using API_Controller_Demo.Model;
+﻿using ApplicationLayer.DTOs;
 using ApplicationLayer.Interface;
-using ApplicationLayer.Services;
 using AutoMapper;
 using DomainLayer.Entities;
 using DomainLayer.Enums;
-using InfrastructureLayer.Data;
-using InfrastructureLayer.Helper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using NewDemoProject.Model;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using URF.Core.Abstractions;
 
 namespace API_Controller_Demo.Controllers

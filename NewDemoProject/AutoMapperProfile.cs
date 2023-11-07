@@ -1,7 +1,6 @@
-﻿using AutoMapper;
+﻿using ApplicationLayer.DTOs;
+using AutoMapper;
 using DomainLayer.Entities;
-using NewDemoProject.Model;
-using System;
 
 namespace API_Controller_Demo
 {
@@ -13,6 +12,8 @@ namespace API_Controller_Demo
             CreateMap<MovieDto, Movie>(); 
             CreateMap<TheaterDto, Theater>();
             CreateMap<ShowTimeDto, ShowTime>();
+            CreateMap<BookingDto, Booking>();
+            CreateMap<ReviewDto, Reviews>();
         }
     }
 }

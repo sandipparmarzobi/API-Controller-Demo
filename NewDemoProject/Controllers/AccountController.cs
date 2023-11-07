@@ -1,4 +1,4 @@
-﻿using API_Controller_Demo.Model;
+﻿using ApplicationLayer.DTOs;
 using ApplicationLayer.Interface;
 using DomainLayer.Entities;
 using InfrastructureLayer.Data;
@@ -6,7 +6,6 @@ using InfrastructureLayer.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using NewDemoProject.Model;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -78,7 +77,7 @@ namespace API_Controller_Demo.Controllers
                     // Create claims for the login user for the generate token.
                     var claims = new List<Claim>
                     {
-                        new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                         new Claim(ClaimTypes.Name, user.UserName),
                         new Claim(ClaimTypes.Email, user.Email),
                         new Claim(JwtRegisteredClaimNames.Iat,new DateTimeOffset(DateTime.Now).ToString())
@@ -91,7 +90,7 @@ namespace API_Controller_Demo.Controllers
                     }
                     var claimsIdentity = new ClaimsIdentity(claims, "JWT");
 
-                    // For Manual Handle Remember Me
+                    // Manualy Handle Remember Me functionality with the help of token expiry
                     if (model.RememberMe)
                     {
                         var expiresInMinutes = model.RememberMe ? 7 * 24 * 60 : 15;
@@ -99,8 +98,6 @@ namespace API_Controller_Demo.Controllers
                     }
                     // Generate a JWT token using the JwtTokenHelper class.
                     string token = _jwtTokenHelper.GenerateToken(claimsIdentity, expirationMinutes);
-
-                    rtn.Message = "\"User created and send the email for account confirmation";
                     rtn.Status = DomainLayer.Enums.Status.Success;
                     rtn.Data = token;
                     return rtn;

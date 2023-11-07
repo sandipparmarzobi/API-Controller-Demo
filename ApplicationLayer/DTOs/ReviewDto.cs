@@ -2,7 +2,7 @@ using DomainLayer.Entities;
 using DomainLayer.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace NewDemoProject.Model
+namespace ApplicationLayer.DTOs
 {
     public class ReviewDto
     {

@@ -7,5 +7,6 @@ namespace ApplicationLayer.Interface
         public Seats? FindBySeatNumber(int SeatNumber);
         public List<int> FindReservedSeats(List<int> seatNumbers);
         public List<Seats> FindSeatsbySeatNumbers(List<int> seatNumbers);
+        public List<Seats> FindSeatsbyTheatorAndShowTime(Guid theatorId,Guid showtimeId);
     }
 }

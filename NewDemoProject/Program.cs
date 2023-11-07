@@ -52,19 +52,19 @@ builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 // Dependancy Injection for Email Service
 builder.Services.AddSingleton<IEmailService, EmailService>(sp =>
 {
-  var ServiceProvider = builder.Services.BuildServiceProvider();
-  var logger= ServiceProvider.GetRequiredService<ILogger<EmailService>>();
-
-  var smtpServer = builder.Configuration["SmtpConfig:SmtpServer"];
-  var smtpPort = int.Parse(builder.Configuration["SmtpConfig:SmtpPort"]);
-  var smtpUsername = builder.Configuration["SmtpConfig:SmtpUsername"];
-  var smtpPassword = builder.Configuration["SmtpConfig:SmtpPassword"];
-  var senderEmail = builder.Configuration["SmtpConfig:SenderEmail"];
-    return new EmailService(smtpServer, smtpPort, smtpUsername, smtpPassword, senderEmail,logger);
+    var ServiceProvider = builder.Services.BuildServiceProvider();
+    var logger = ServiceProvider.GetRequiredService<ILogger<EmailService>>();
+    var smtpServer = builder.Configuration["SmtpConfig:SmtpServer"];
+    var smtpPort = int.Parse(builder.Configuration["SmtpConfig:SmtpPort"]);
+    var smtpUsername = builder.Configuration["SmtpConfig:SmtpUsername"];
+    var smtpPassword = builder.Configuration["SmtpConfig:SmtpPassword"];
+    var senderEmail = builder.Configuration["SmtpConfig:SenderEmail"];
+    return new EmailService(smtpServer, smtpPort, smtpUsername, smtpPassword, senderEmail, logger);
 });
 
 //Dependancy Injection For User and Role 
-builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(option => {
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(option =>
+{
     option.User.RequireUniqueEmail = true;
     option.SignIn.RequireConfirmedAccount = true;
 

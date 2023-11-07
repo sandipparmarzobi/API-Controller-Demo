@@ -1,4 +1,5 @@
-﻿using DomainLayer.Entities;
+﻿using ApplicationLayer.DTOs;
+using DomainLayer.Entities;
 
 namespace ApplicationLayer.Interface
 {
@@ -6,5 +7,11 @@ namespace ApplicationLayer.Interface
     {
         Movie? GetById(Guid id);
         Movie? GetByName(string title);
+
+        Task AddMovie(MovieDto movie);
+
+        Task UpdateMovie(Guid id, MovieDto updatedMovie);
+
+        Task DeleteMovie(Guid id);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using DomainLayer.Enums;
 
-namespace API_Controller_Demo.Model
+namespace ApplicationLayer.DTOs
 {
     public class ActionResultData
     {

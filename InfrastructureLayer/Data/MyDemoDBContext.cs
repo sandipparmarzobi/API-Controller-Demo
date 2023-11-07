@@ -22,6 +22,8 @@ namespace InfrastructureLayer.Data
         {
             base.OnModelCreating(modelBuilder);
 
+         
+
             // Genre
             modelBuilder
             .Entity<Movie>()
@@ -167,9 +169,10 @@ namespace InfrastructureLayer.Data
                 .HasForeignKey(r => r.ShowTimeId);
 
             modelBuilder.Entity<ShowTime>()
-               .HasMany(m => m.Seats)
-               .WithOne(r => r.ShowTime)
-               .HasForeignKey(r => r.ShowTimeId);
+         .HasMany(s => s.Seats)
+         .WithOne(seat => seat.ShowTime)
+         .HasForeignKey(seat => seat.ShowTimeId)
+         .OnDelete(DeleteBehavior.Cascade);
 
             #endregion
         }

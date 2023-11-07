@@ -35,5 +35,13 @@ namespace ApplicationLayer.Services
 
             return reservedSeatNumbers;
         }
+
+        public List<Seats> FindSeatsbyTheatorAndShowTime(Guid theatorId, Guid showtimeId)
+        {
+            var seates = Repository.Queryable()
+               .Where(seat => seat.TheaterId == theatorId && seat.ShowTimeId == showtimeId)
+               .ToList();
+            return seates;
+        }
     }
 }

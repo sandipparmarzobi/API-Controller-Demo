@@ -2,21 +2,22 @@ using DomainLayer.Entities;
 using DomainLayer.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace NewDemoProject.Model
+namespace ApplicationLayer.DTOs
 {
     public class BookingDto
     {
         [Required]
-        public string UserId { get; set; }
+        public Guid UserId { get; set; }
 
         [Required]
-        public string MovieId { get; set; }
+        public Guid MovieId { get; set; }
 
         [Required]
-        public string ShowTimeId { get; set; }
+        public Guid ShowTimeId { get; set; }
 
         // Seat number is like "1,3,4,5"
         [Required]
+        //[RegularExpression(@"^\d+$", ErrorMessage = "SeatNumbers must contain only numeric characters.")]   
         public string SeatNumbers { get; set; }
     }
 }

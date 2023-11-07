@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace DomainLayer.Entities
+namespace ApplicationLayer.DTOs
 {
     public class TheaterDto 
     {
