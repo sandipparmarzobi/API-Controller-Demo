@@ -1,4 +1,4 @@
-using API_Controller_Demo;
+using ApplicationLayer;
 using ApplicationLayer.Interface;
 using ApplicationLayer.Repository;
 using ApplicationLayer.Services;
@@ -62,13 +62,14 @@ builder.Services.AddSingleton<IEmailService, EmailService>(sp =>
     return new EmailService(smtpServer, smtpPort, smtpUsername, smtpPassword, senderEmail, logger);
 });
 
-//Dependancy Injection For User and Role 
+//Dependancy Injection for Authentication Services
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(option =>
 {
     option.User.RequireUniqueEmail = true;
     option.SignIn.RequireConfirmedAccount = true;
 
 }).AddEntityFrameworkStores<MyDemoDBContext>().AddDefaultTokenProviders();
+
 // JWT Token Service
 builder.Services.AddAuthentication(cfg =>
 {

@@ -279,7 +279,6 @@ namespace InfrastructureLayer.Migrations
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     MovieId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     ShowTimeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    SeatsId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -294,11 +293,7 @@ namespace InfrastructureLayer.Migrations
                         column: x => x.MovieId,
                         principalTable: "Movie",
                         principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Booking_Seats_SeatsId",
-                        column: x => x.SeatsId,
-                        principalTable: "Seats",
-                        principalColumn: "Id");
+                  
                     table.ForeignKey(
                         name: "FK_Booking_ShowTime_ShowTimeId",
                         column: x => x.ShowTimeId,
@@ -374,11 +369,6 @@ namespace InfrastructureLayer.Migrations
                 name: "IX_Booking_MovieId",
                 table: "Booking",
                 column: "MovieId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Booking_SeatsId",
-                table: "Booking",
-                column: "SeatsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Booking_ShowTimeId",

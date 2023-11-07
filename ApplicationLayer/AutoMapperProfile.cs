@@ -2,7 +2,7 @@
 using AutoMapper;
 using DomainLayer.Entities;
 
-namespace API_Controller_Demo
+namespace ApplicationLayer
 {
     //SP: Custom class with map dto with actual Entity
     public class AutoMapperProfile : Profile

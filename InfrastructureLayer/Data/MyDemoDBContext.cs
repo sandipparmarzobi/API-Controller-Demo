@@ -22,15 +22,11 @@ namespace InfrastructureLayer.Data
         {
             base.OnModelCreating(modelBuilder);
 
-         
-
             // Genre
             modelBuilder
             .Entity<Movie>()
             .Property(d => d.Genre)
             .HasConversion(new EnumToStringConverter<MovieGenre>());
-
-          
 
             #region Application User
 
