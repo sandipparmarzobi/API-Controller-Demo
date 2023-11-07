@@ -5,6 +5,11 @@ namespace DomainLayer.Entities
 {
     public class Reviews : Entity
     {
+        public Reviews()
+        {
+            ReviewDate = DateTime.Now;
+        }
+
         [Key]
         public Guid Id { get; set; }
         public int Ratting { get; set; }

@@ -19,23 +19,18 @@ namespace API_Controller_Demo.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ShowTimeController : ControllerBase
+    public class ReviewController : ControllerBase
     {
         private readonly IMapper _mapper;
-        private readonly IShowTimeService _showtimeServie;
-        private readonly ITheaterService _theaterServie;
+        private readonly IReviewService _reviewService;
         private readonly IMovieService _movieServie;
-        private readonly ISeatService _seatService;
         private readonly IUnitOfWork _unitOfWork;
 
-        public ShowTimeController(IMapper mapper, IShowTimeService showtimeServie, 
-            ITheaterService theaterServie, IMovieService movieServie, ISeatService seatService , IUnitOfWork unitOfWork)
+        public ReviewController(IMapper mapper, IReviewService reviewService, IMovieService movieServie, IUnitOfWork unitOfWork)
         {
             _mapper = mapper;
-            _showtimeServie = showtimeServie;
-            _theaterServie = theaterServie;
+            _reviewService = reviewService;
             _movieServie = movieServie;
-            _seatService = seatService;
             _unitOfWork = unitOfWork;
         }
 
@@ -47,8 +42,8 @@ namespace API_Controller_Demo.Controllers
             var rtn = new ActionResultData();
             try
             {
-                var showtimes = _showtimeServie.FindAll();
-                rtn.Data = showtimes;
+                var reviews = _reviewService.FindAll();
+                rtn.Data = reviews;
                 rtn.Status = Status.Success;
                 return Task.FromResult(rtn);
             }
@@ -63,19 +58,22 @@ namespace API_Controller_Demo.Controllers
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [Route("Add")]
-        public async Task<ActionResultData> Add([FromBody] ShowTimeDto showtime)
+        public async Task<ActionResultData> Add([FromBody] ReviewDto review)
         {
             var rtn = new ActionResultData();
             try
             {
-                var theator = _theaterServie.FindAsync(showtime.TheaterId).Result;
-                if (theator == null)
+                var userId = HttpContext.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+                var username = HttpContext.User.Identity.Name;
+
+                if (userId != review.UserId)
                 {
                     rtn.Status = Status.Failed;
-                    rtn.Message = "Theator is not found";
+                    rtn.Message = "User is not authenticated";
                     return rtn;
                 }
-                var movie = _movieServie.FindAsync(showtime.MovieId).Result;
+
+                var movie = _movieServie.FindAsync(review.MovieId).Result;
                 if (movie == null)
                 {
                     rtn.Status = Status.Failed;
@@ -83,26 +81,14 @@ namespace API_Controller_Demo.Controllers
                     return rtn;
                 }
 
-                var showtimeEntity = _mapper.Map<ShowTime>(showtime);
-                _showtimeServie.Insert(showtimeEntity);
-                //await _unitOfWork.SaveChangesAsync();
+                var reviewEntity = _mapper.Map<Reviews>(review);
+                _reviewService.Insert(reviewEntity);
 
-                for (int i = 1; i <= theator.Capasity; i++)
-                {
-                    Seats seats = new()
-                    {
-                        Theater = theator,
-                        TheaterId = theator.Id,
-                        ShowTime = showtimeEntity,
-                        ShowTimeId = showtimeEntity.Id,
-                        SeatNumber = i
-                    };
-                    _seatService.Insert(seats);
-                }
                 await _unitOfWork.SaveChangesAsync();
                 rtn.Status = Status.Success;
-                rtn.Message = "Showtime Added Successfully";
+                rtn.Message = "Review Added Successfully";
                 return rtn;
+                
             }
             catch (Exception ex)
             {
@@ -115,33 +101,35 @@ namespace API_Controller_Demo.Controllers
         [Authorize(Roles = "Admin")]
         [HttpPut]
         [Route("Update")]
-        public async Task<ActionResultData> Update(Guid id, [FromBody] ShowTimeDto updatedshowtime)
+        public async Task<ActionResultData> Update(Guid id, [FromBody] ReviewDto updatedReview)
         {
             var rtn = new ActionResultData();
             try
             {
-                if (updatedshowtime == null)
+                if (updatedReview == null)
                 {
                     rtn.Status = Status.Failed;
                     rtn.Message = "Invalid request data.";
                     return rtn;
                 }
-                var existingshowtime = _showtimeServie.FindAsync(id).Result;
-                if (existingshowtime == null)
+                var existingReview = _reviewService.FindAsync(id).Result;
+                if (existingReview == null)
                 {
                     rtn.Status = Status.Failed;
-                    rtn.Message = "Showtime not found.";
+                    rtn.Message = "Review not found.";
                     return rtn;
                 }
-                existingshowtime.StartTime = updatedshowtime.StartTime;
-                existingshowtime.EndTime = updatedshowtime.EndTime;
-                existingshowtime.MovieId = updatedshowtime.MovieId;
-                existingshowtime.TheaterId = updatedshowtime.TheaterId;
 
-                _showtimeServie.Update(existingshowtime);
+                existingReview.UserId = Guid.Parse(updatedReview.UserId);
+                existingReview.MovieId = Guid.Parse(updatedReview.MovieId);
+                existingReview.Ratting = updatedReview.Ratting;
+                existingReview.Comments = updatedReview.Comments;
+                existingReview.ReviewDate = DateTime.Now;
+
+                _reviewService.Update(existingReview);
                 await _unitOfWork.SaveChangesAsync();
                 rtn.Status = Status.Success;
-                rtn.Message = "Showtime Updated Successfully";
+                rtn.Message = "Review Updated Successfully";
                 return rtn;
             }
             catch (Exception ex)
@@ -160,17 +148,17 @@ namespace API_Controller_Demo.Controllers
             var rtn = new ActionResultData();
             try
             {
-                var existingMovie = _showtimeServie.FindAsync(id).Result;
-                if (existingMovie == null)
+                var existingReview = _reviewService.FindAsync(id).Result;
+                if (existingReview == null)
                 {
                     rtn.Status = Status.Failed;
-                    rtn.Message = "ShowTime not found.";
+                    rtn.Message = "Review not found.";
                     return rtn;
                 }
-                _showtimeServie.Delete(existingMovie);
+                _reviewService.Delete(existingReview);
                 await _unitOfWork.SaveChangesAsync();
                 rtn.Status = Status.Success;
-                rtn.Message = "ShowTime Deleted Successfully.";
+                rtn.Message = "Review Deleted Successfully.";
                 return rtn;
             }
             catch (Exception ex)

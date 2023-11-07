@@ -103,7 +103,7 @@ namespace API_Controller_Demo.Controllers
                 _theaterServie.Update(existingTheater);
                 await _unitOfWork.SaveChangesAsync();
                 rtn.Status = Status.Success;
-                rtn.Message = "Movie Updated Successfully";
+                rtn.Message = "Theater Updated Successfully";
                 return rtn;
             }
             catch (Exception ex)
@@ -122,17 +122,17 @@ namespace API_Controller_Demo.Controllers
             var rtn = new ActionResultData();
             try
             {
-                var existingMovie = _theaterServie.FindAsync(id).Result;
-                if (existingMovie == null)
+                var existingTheater = _theaterServie.FindAsync(id).Result;
+                if (existingTheater == null)
                 {
                     rtn.Status = Status.Failed;
-                    rtn.Message = "Movie not found.";
+                    rtn.Message = "Theater not found.";
                     return rtn;
                 }
-                _theaterServie.Delete(existingMovie);
+                _theaterServie.Delete(existingTheater);
                 await _unitOfWork.SaveChangesAsync();
                 rtn.Status = Status.Success;
-                rtn.Message = "Movie Deleted Successfully.";
+                rtn.Message = "Theater Deleted Successfully.";
                 return rtn;
             }
             catch (Exception ex)
