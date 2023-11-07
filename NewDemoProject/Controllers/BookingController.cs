@@ -99,5 +99,26 @@ namespace API_Controller_Demo.Controllers
                 return rtn;
             }
         }
+
+        [Authorize(Roles = "Admin")]
+        [HttpDelete]
+        [Route("Cancel")]
+        public async Task<ActionResultData> CancelBooking(Guid id)
+        {
+            var rtn = new ActionResultData();
+            try
+            {
+                await _bookingServie.CancelBooking(id);
+                rtn.Status = Status.Success;
+                rtn.Message = "Booking Cancelled Successfully.";
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                rtn.Status = Status.Failed;
+                rtn.Message = ex.Message;
+                return rtn;
+            }
+        }
     }
 }

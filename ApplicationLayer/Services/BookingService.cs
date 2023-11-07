@@ -148,12 +148,19 @@ namespace ApplicationLayer.Services
             var seatBooking = _seatBookingService.FindSeatBookingByBookingId(existingBooking.Id);
             if (seatBooking != null && seatBooking.Count > 0)
             {
+                var bookedSeatNumbers = seatBooking.Select(x=> x.SeatNumber).ToList();
                 foreach (var item in seatBooking)
                 {
                     {
-                        item.Seats.IsReserved = false;
-                        _seatService.Update(item.Seats);
                         _seatBookingService.Delete(item);
+                    }
+                }
+                var seats=_seatService.FindSeatsbySeatNumbers(bookedSeatNumbers);
+                foreach (var item in seats)
+                {
+                    {
+                        item.IsReserved = false;
+                        _seatService.Update(item);
                     }
                 }
                 Delete(existingBooking);
@@ -167,11 +174,13 @@ namespace ApplicationLayer.Services
             var seatBooking = _seatBookingService.FindSeatBookingByBookingId(existingBooking.Id);
             if (seatBooking != null && seatBooking.Count > 0)
             {
-                foreach (var item in seatBooking)
+                var bookedSeatNumbers = seatBooking.Select(x => x.SeatNumber).ToList();
+                var seats = _seatService.FindSeatsbySeatNumbers(bookedSeatNumbers);
+                foreach (var item in seats)
                 {
                     {
-                         item.Seats.IsReserved = false;
-                        _seatService.Update(item.Seats);
+                        item.IsReserved = false;
+                        _seatService.Update(item);
                     }
                 }
                 existingBooking.BookingStatus = DomainLayer.Enums.BookingStatus.Cancelled;

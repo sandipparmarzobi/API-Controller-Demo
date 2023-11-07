@@ -8,5 +8,7 @@ namespace ApplicationLayer.Interface
         public Task AddBooking(BookingDto booking);
         public Task UpdateBooking(Guid id, BookingDto booking);
         public Task DeleteBooking(Guid id);
+
+        public Task CancelBooking(Guid id);
     }
 }
