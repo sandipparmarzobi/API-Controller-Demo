@@ -25,6 +25,10 @@ namespace API_Controller_Demo.Controllers
             try
             {
                 var movies =  _movieServie.FindAll();
+                foreach (var movie in movies)
+                {
+                    movie.ImageBase64 = Convert.ToBase64String(movie.Image);
+                }
                 rtn.Data = movies;
                 rtn.Status = Status.Success;
                 return rtn;

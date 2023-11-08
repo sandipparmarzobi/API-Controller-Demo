@@ -1,5 +1,6 @@
 ﻿using DomainLayer.Enums;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using URF.Core.EF.Trackable;
 
 namespace DomainLayer.Entities
@@ -16,6 +17,9 @@ namespace DomainLayer.Entities
         public string Director { get; set; }
         public string TrailerURL { get; set; }
         public byte[] Image { get; set; }
+
+        [NotMapped]
+        public string ImageBase64 { get; set; }
         public ICollection<Booking>? Bookings { get; set; }
         public ICollection<Reviews>? Reviews { get; set; }
         public ICollection<ShowTime>? ShowTime { get; set; }
