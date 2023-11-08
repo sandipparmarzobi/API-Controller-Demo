@@ -104,7 +104,9 @@ builder.Services.AddSingleton(sp =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddMvcCore()
+        .AddDataAnnotations()
+        .AddCors();
 // For Swagger Authorize button
 builder.Services.AddSwaggerGen(c =>
 {

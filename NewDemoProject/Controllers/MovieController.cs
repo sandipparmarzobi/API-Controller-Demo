@@ -40,7 +40,7 @@ namespace API_Controller_Demo.Controllers
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [Route("Add")]
-        public async Task<ActionResultData> Add([FromBody] MovieDto movie)
+        public async Task<ActionResultData> Add([FromForm] MovieDto movie)
         {
             var rtn = new ActionResultData();
             try
@@ -67,6 +67,7 @@ namespace API_Controller_Demo.Controllers
             try
             {
                 await _movieServie.UpdateMovie(id, updatedMovie);
+
                 rtn.Status = Status.Success;
                 rtn.Message = "Movie Updated Successfully";
                 return rtn;

@@ -4,6 +4,7 @@ using ApplicationLayer.Repository;
 using AutoMapper;
 using DomainLayer.Entities;
 using DomainLayer.Enums;
+using Microsoft.EntityFrameworkCore;
 using URF.Core.Abstractions;
 
 namespace ApplicationLayer.Services
@@ -21,6 +22,12 @@ namespace ApplicationLayer.Services
         public async Task AddMovie(MovieDto movie)
         {
             var movieEntity = _mapper.Map<Movie>(movie);
+            // Save the image in the database
+            using (var memoryStream = new MemoryStream())
+            {
+                await movie.ImageFile.CopyToAsync(memoryStream);
+                movieEntity.Image = memoryStream.ToArray();
+            }
             Insert(movieEntity);
             await _unitOfWork.SaveChangesAsync();
         }
@@ -45,7 +52,6 @@ namespace ApplicationLayer.Services
             existingMovie.Description = updatedMovie.Description;
             existingMovie.Duration = updatedMovie.Duration;
             existingMovie.Director = updatedMovie.Director;
-            existingMovie.PosterURL = updatedMovie.PosterURL;
             existingMovie.TrailerURL = updatedMovie.TrailerURL;
             Update(existingMovie);
             await _unitOfWork.SaveChangesAsync();

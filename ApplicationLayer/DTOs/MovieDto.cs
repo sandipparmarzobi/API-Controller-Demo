@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
 namespace ApplicationLayer.DTOs
@@ -21,12 +22,13 @@ namespace ApplicationLayer.DTOs
         public string Duration { get; set; }
 
         [Required]
-        public string Director { get; set; }
+        public string? Director { get; set; }
 
         [Required]
-        public string PosterURL { get; set; }
+        public string? TrailerURL { get; set; }
 
         [Required]
-        public string TrailerURL { get; set; }
+        public IFormFile ImageFile { get; set; }
+
     }
 }

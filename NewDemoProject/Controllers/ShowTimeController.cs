@@ -76,8 +76,6 @@ namespace API_Controller_Demo.Controllers
                 rtn.Message += ex.Message;
                 return rtn;
             }
-
-
         }
 
         [Authorize(Roles = "Admin")]

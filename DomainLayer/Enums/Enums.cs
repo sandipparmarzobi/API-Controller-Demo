@@ -18,6 +18,7 @@ namespace DomainLayer.Enums
         Documentary = 11
     }
 
+
     public enum Status
     {
         Success,
