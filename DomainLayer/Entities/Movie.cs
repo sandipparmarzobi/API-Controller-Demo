@@ -1,6 +1,8 @@
 ﻿using DomainLayer.Enums;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using URF.Core.EF.Trackable;
 
 namespace DomainLayer.Entities
@@ -11,6 +13,8 @@ namespace DomainLayer.Entities
         public Guid Id { get; set; }
         public string Title { get; set; }
         public DateTime ReleaseDate { get; set; }
+
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public MovieGenre Genre { get; set; }
         public string Description { get; set; }
         public string Duration { get; set; }

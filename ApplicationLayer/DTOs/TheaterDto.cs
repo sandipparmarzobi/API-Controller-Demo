@@ -11,6 +11,6 @@ namespace ApplicationLayer.DTOs
         public string Location { get; set; }
 
         [Required]
-        public int Capasity { get; set; }
+        public int Capacity { get; set; }
     }
 }

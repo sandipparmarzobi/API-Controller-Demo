@@ -31,7 +31,7 @@ namespace ApplicationLayer.Services
                 var existingTheater = await FindAsync(id) ?? throw new Exception("Theater not found.");
                 existingTheater.Name = updatedTheater.Name;
                 existingTheater.Location = updatedTheater.Location;
-                existingTheater.Capasity = updatedTheater.Capasity;
+                existingTheater.Capacity = updatedTheater.Capacity;
                 Update(existingTheater);
                 await _unitOfWork.SaveChangesAsync();
             }
@@ -44,7 +44,7 @@ namespace ApplicationLayer.Services
         public async Task DeleteTheater(Guid id)
         {
             var existingTheater = await FindAsync(id) ?? throw new Exception("Theater not found.");
-            await DeleteAsync(existingTheater);
+            Delete(existingTheater);
             await _unitOfWork.SaveChangesAsync();
         }
     }

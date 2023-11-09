@@ -41,6 +41,30 @@ namespace API_Controller_Demo.Controllers
             }
         }
 
+        [HttpGet]
+        [Route("GetById")]
+        public async Task<ActionResultData> Get(Guid id)
+        {
+            var rtn = new ActionResultData();
+            try
+            {
+                var movie = _movieServie.FindById(id);
+                if (movie != null)
+                {
+                    movie.ImageBase64 = Convert.ToBase64String(movie.Image);
+                    rtn.Data = movie;
+                }
+                rtn.Status = Status.Success;
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                rtn.Status = Status.Failed;
+                rtn.Message = ex.Message;
+                return rtn;
+            }
+        }
+
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [Route("Add")]
@@ -65,7 +89,7 @@ namespace API_Controller_Demo.Controllers
         [Authorize(Roles = "Admin")]
         [HttpPut]
         [Route("Update")]
-        public async Task<ActionResultData> Update(Guid id, [FromBody] MovieDto updatedMovie)
+        public async Task<ActionResultData> Update(Guid id, [FromForm] MovieDto updatedMovie)
         {
             var rtn = new ActionResultData();
             try

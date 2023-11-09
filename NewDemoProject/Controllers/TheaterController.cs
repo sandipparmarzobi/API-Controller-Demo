@@ -1,5 +1,6 @@
 ﻿using ApplicationLayer.DTOs;
 using ApplicationLayer.Interface;
+using ApplicationLayer.Services;
 using AutoMapper;
 using DomainLayer.Entities;
 using DomainLayer.Enums;
@@ -29,6 +30,29 @@ namespace API_Controller_Demo.Controllers
             {
                 var theaters = _theaterServie.FindAll();
                 rtn.Data = theaters;
+                rtn.Status = Status.Success;
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                rtn.Status = Status.Failed;
+                rtn.Message = ex.Message;
+                return rtn;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetById")]
+        public async Task<ActionResultData> Get(Guid id)
+        {
+            var rtn = new ActionResultData();
+            try
+            {
+                var theater = _theaterServie.FindById(id);
+                if (theater != null)
+                {
+                    rtn.Data = theater;
+                }
                 rtn.Status = Status.Success;
                 return rtn;
             }

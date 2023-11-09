@@ -37,7 +37,7 @@ namespace ApplicationLayer.Services
 
             var showtimeEntity = _mapper.Map<ShowTime>(showtime);
             Insert(showtimeEntity);
-            for (int i = 1; i <= theator.Capasity; i++)
+            for (int i = 1; i <= theator.Capacity; i++)
             {
                 Seats seats = new()
                 {
@@ -72,7 +72,7 @@ namespace ApplicationLayer.Services
                 existingshowtime.TicketPrice = updatedshowtime.TicketPrice;
                 Update(existingshowtime);
 
-                for (int i = 1; i <= theator.Capasity; i++)
+                for (int i = 1; i <= theator.Capacity; i++)
                 {
                     Seats seats = new()
                     {
