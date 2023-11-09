@@ -1,5 +1,4 @@
-﻿using DomainLayer.Enums;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using URF.Core.EF.Trackable;
 
 namespace DomainLayer.Entities
@@ -16,6 +15,7 @@ namespace DomainLayer.Entities
         public Guid? TheaterId { get; set; }
         public Theater? Theater { get; set; }
         public decimal TicketPrice { get; set; }
+        public bool HideShowTime { get; set; }
         public ICollection<Booking>? Bookings { get; set; }
         public ICollection<Seats>? Seats { get; set; }
     }
