@@ -1,5 +1,6 @@
 ﻿using ApplicationLayer.DTOs;
 using ApplicationLayer.Interface;
+using DomainLayer.Entities;
 using DomainLayer.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +24,7 @@ namespace API_Controller_Demo.Controllers
             var rtn = new ActionResultData();
             try
             {
-                var showtimes = _showtimeService.FindAll();
+                var showtimes = _showtimeService.GetShowTimeDataIncludMoiveAndTheater();
                 rtn.Data = showtimes;
                 rtn.Status = Status.Success;
                 return Task.FromResult(rtn);
@@ -37,11 +38,33 @@ namespace API_Controller_Demo.Controllers
         }
 
         [Authorize(Roles = "Admin")]
+        [HttpGet]
+        [Route("GetShowTimeData")]
+        public async Task<ActionResultData> GetShowTimeData()
+        {
+            var rtn = new ActionResultData();
+            try
+            {
+                var showtimes = await _showtimeService.GetShowTimeData();
+                rtn.Data = showtimes;
+                rtn.Status = Status.Success;
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                rtn.Status = Status.Failed;
+                rtn.Message = ex.Message;
+                return rtn;
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [Route("Add")]
         public async Task<ActionResultData> Add([FromBody] ShowTimeDto showtime)
         {
             var rtn = new ActionResultData();
+           
             try
             {
                 await _showtimeService.AddShowTime(showtime);
@@ -97,6 +120,13 @@ namespace API_Controller_Demo.Controllers
                 rtn.Message = ex.Message;
                 return rtn;
             }
+        }
+
+        private string? GetModelErrors()
+        {
+            return (from item in ModelState.Values
+                    from error in item.Errors
+                    select error.ErrorMessage).ToString();
         }
     }
 }

@@ -9,5 +9,8 @@ namespace ApplicationLayer.Interface
         public Task AddShowTime(ShowTimeDto showTime);
         public Task UpdateShowTime(Guid id, ShowTimeDto showTime);
         public Task DeleteShowTime(Guid id);
+        public Task<ShowTimeDataDto> GetShowTimeData();
+
+        public Task<List<ShowTimeDto>> GetShowTimeDataIncludMoiveAndTheater();
     }
 }

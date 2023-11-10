@@ -27,8 +27,7 @@ namespace ApplicationLayer.DTOs
         [Required]
         public string? TrailerURL { get; set; }
 
-        [Required]
-        public IFormFile ImageFile { get; set; }
+        public IFormFile? ImageFile { get; set; }
 
     }
 }

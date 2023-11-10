@@ -22,11 +22,18 @@ namespace ApplicationLayer.Services
         public async Task AddMovie(MovieDto movie)
         {
             var movieEntity = _mapper.Map<Movie>(movie);
-            // Save the image in the database
-            using (var memoryStream = new MemoryStream())
+            if (movie.ImageFile != null)
             {
-                await movie.ImageFile.CopyToAsync(memoryStream);
-                movieEntity.Image = memoryStream.ToArray();
+                // Save the image in the database
+                using (var memoryStream = new MemoryStream())
+                {
+                    await movie.ImageFile.CopyToAsync(memoryStream);
+                    movieEntity.Image = memoryStream.ToArray();
+                }
+            }
+            else
+            {
+                throw new Exception("Please Upload Movie Image");
             }
             Insert(movieEntity);
             await _unitOfWork.SaveChangesAsync();
@@ -46,6 +53,15 @@ namespace ApplicationLayer.Services
                 throw new Exception("Invalid request data.");
             }
             var existingMovie = FindById(id) ?? throw new Exception("Movie not found.");
+            if (updatedMovie.ImageFile != null)
+            {
+                // Save the image in the database
+                using (var memoryStream = new MemoryStream())
+                {
+                    await updatedMovie.ImageFile.CopyToAsync(memoryStream);
+                    existingMovie.Image = memoryStream.ToArray();
+                }
+            }
             existingMovie.Title = updatedMovie.Title;
             existingMovie.ReleaseDate = updatedMovie.ReleaseDate;
             existingMovie.Genre = Enum.Parse<MovieGenre>(updatedMovie.Genre);
