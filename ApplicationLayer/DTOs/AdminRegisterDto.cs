@@ -1,9 +1,21 @@
+using AutoMapper.Configuration.Annotations;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace ApplicationLayer.DTOs
 {
     public class AdminRegisterDto
     {
+        [JsonIgnore]
+        public string Id { get; set; }
+
+        [JsonIgnore]
+        public string RegistrationDate { get; set; }
+
+        [Ignore]
+        public string EmailConfirmed { get; set; }
+
         [Required(ErrorMessage = "Username is required")]
         public string Username { get; set; }
 

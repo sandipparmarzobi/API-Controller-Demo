@@ -1,5 +1,6 @@
 ﻿using ApplicationLayer.DTOs;
 using ApplicationLayer.Interface;
+using ApplicationLayer.Services;
 using DomainLayer.Entities;
 using DomainLayer.Enums;
 using Microsoft.AspNetCore.Authorization;
@@ -19,21 +20,44 @@ namespace API_Controller_Demo.Controllers
 
         [HttpGet]
         [Route("Get")]
-        public Task<ActionResultData> Get()
+        public async Task<ActionResultData> Get()
         {
             var rtn = new ActionResultData();
             try
             {
-                var showtimes = _showtimeService.GetShowTimeDataIncludMoiveAndTheater();
+                var showtimes = await _showtimeService.GetShowTimeDataIncludMoiveAndTheater();
                 rtn.Data = showtimes;
                 rtn.Status = Status.Success;
-                return Task.FromResult(rtn);
+                return rtn;
             }
             catch (Exception ex)
             {
                 rtn.Status = Status.Failed;
                 rtn.Message = ex.Message;
-                return Task.FromResult(rtn);
+                return rtn;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetById")]
+        public async Task<ActionResultData> Get(Guid id)
+        {
+            var rtn = new ActionResultData();
+            try
+            {
+                var showTime = await _showtimeService.GetById(id);
+                if (showTime != null)
+                {
+                    rtn.Data = showTime;
+                }
+                rtn.Status = Status.Success;
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                rtn.Status = Status.Failed;
+                rtn.Message = ex.Message;
+                return rtn;
             }
         }
 

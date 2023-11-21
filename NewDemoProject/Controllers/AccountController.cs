@@ -1,11 +1,14 @@
 ﻿using ApplicationLayer.DTOs;
 using ApplicationLayer.Interface;
+using AutoMapper;
 using DomainLayer.Entities;
+using DomainLayer.Enums;
 using InfrastructureLayer.Data;
 using InfrastructureLayer.Helper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 
@@ -21,9 +24,10 @@ namespace API_Controller_Demo.Controllers
         private readonly JwtTokenHelper _jwtTokenHelper;
         private readonly MyDemoDBContext _context;
         private readonly IEmailService _emailService;
+        private readonly IMapper _mapper;
 
         public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager,
-            RoleManager<ApplicationRole> roleManager, JwtTokenHelper jwtTokenHelper, MyDemoDBContext context, IEmailService emailService)
+            RoleManager<ApplicationRole> roleManager, JwtTokenHelper jwtTokenHelper, MyDemoDBContext context, IEmailService emailService, IMapper mapper)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -31,6 +35,7 @@ namespace API_Controller_Demo.Controllers
             _jwtTokenHelper = jwtTokenHelper;
             _context = context;
             _emailService = emailService;
+            _mapper = mapper;
         }
 
         [Authorize(Roles = "Admin")]
@@ -53,6 +58,58 @@ namespace API_Controller_Demo.Controllers
                 }
             }
             return BadRequest("Role already exists.");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        [Route("Get")]
+        public async Task<ActionResultData> Get()
+        {
+            var rtn = new ActionResultData();
+            try
+            {
+                List<AdminRegisterDto> userList = new List<AdminRegisterDto>();
+                var users = _userManager.Users.ToList();
+                foreach (var item in users)
+                {
+                    var roles = await _userManager.GetRolesAsync(item);
+                    var user = _mapper.Map<AdminRegisterDto>(item);
+                    user.Role = string.Join(",", roles);
+                    userList.Add(user);
+                }
+                rtn.Data = userList;
+                rtn.Status = Status.Success;
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                rtn.Status = Status.Failed;
+                rtn.Message = ex.Message;
+                return rtn;
+            }
+        }
+
+        [HttpGet]
+        [Route("GetById")]
+        public async Task<ActionResultData> Get(Guid id)
+        {
+            var rtn = new ActionResultData();
+            try
+            {
+                var user = _userManager.FindByIdAsync(id.ToString());
+                if (user != null)
+                {
+                    rtn.Data = user;
+                }
+                rtn.Status = Status.Success;
+                return rtn;
+            }
+            catch (Exception ex)
+            {
+                rtn.Status = Status.Failed;
+                rtn.Message = ex.Message;
+                return rtn;
+            }
         }
 
         [HttpPost]

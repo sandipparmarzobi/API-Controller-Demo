@@ -1,4 +1,5 @@
-﻿using ApplicationLayer.Interface;
+﻿using ApplicationLayer.DTOs;
+using ApplicationLayer.Interface;
 using DomainLayer.Entities;
 using URF.Core.Abstractions.Trackable;
 using URF.Core.Services;
@@ -9,6 +10,11 @@ namespace ApplicationLayer.Services
     {
         public UserService(ITrackableRepository<User> repository) : base(repository)
         {
+        }
+
+        public List<AdminRegisterDto> GetAllUsers()
+        {
+            throw new NotImplementedException();
         }
 
         public User? GetById(Guid id)

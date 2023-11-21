@@ -21,6 +21,10 @@ namespace ApplicationLayer
 
             CreateMap<Movie, MovieDataDto>();
             CreateMap<Theater, TheaterDataDto>();
+            CreateMap<ApplicationUser, AdminRegisterDto>()
+                .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.PhoneNumber))
+                .ForMember(dest => dest.RegistrationDate, opt => opt.MapFrom(src => src.RegistrationDate.Value.ToString("G")))
+                .ForMember(dest => dest.EmailConfirmed, opt => opt.MapFrom(src => src.EmailConfirmed.ToString())).ReverseMap(); ;
         }
     }
 }

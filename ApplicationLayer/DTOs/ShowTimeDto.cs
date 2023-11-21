@@ -1,11 +1,15 @@
 using DomainLayer.Entities;
 using DomainLayer.Enums;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ApplicationLayer.DTOs
 {
     public class ShowTimeDto
     {
+        [NotMapped]
+        public string Id { get; set; }
+
         [Required(ErrorMessage = "Screen is required.")]
         [StringLength(1, MinimumLength = 1, ErrorMessage = "Screen must be a single character.")]
         public string Screen { get; set; }

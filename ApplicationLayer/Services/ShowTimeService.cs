@@ -69,6 +69,7 @@ namespace ApplicationLayer.Services
                 existingshowtime.TheaterId = Guid.Parse(updatedshowtime.Theater);
                 existingshowtime.Screen = Convert.ToChar(updatedshowtime.Screen);
                 existingshowtime.TicketPrice = Convert.ToDecimal(updatedshowtime.TicketPrice);
+                existingshowtime.HideShowTime = updatedshowtime.HideShowTime.Value;
                 Update(existingshowtime);
 
                 for (int i = 1; i <= theator.Capacity; i++)
@@ -130,13 +131,26 @@ namespace ApplicationLayer.Services
             foreach (var item in showTime)
             {
                 var showtimeDto = _mapper.Map<ShowTimeDto>(item);
+                showtimeDto.Id = item.Id.ToString();
                 showtimeDto.Movie = item.Movie.Title; 
+                showtimeDto.StartTime = item.StartTime.ToString("t");
+                showtimeDto.EndTime = item.EndTime.ToString("t");
                 showtimeDto.Theater = item.Theater.Name + " - " + item.Theater.Location;
+                showtimeDto.HideShowTime = item.HideShowTime;
                 showTimeList.Add(showtimeDto);
             }
             return showTimeList;
         }
+        public async Task<ShowTimeDto> GetById(Guid Id)
+        {
+            var showTime = _context.ShowTime.Where(x=>x.Id== Id).Include(x => x.Movie).Include(x => x.Theater).FirstOrDefault();
+            if (showTime != null)
+            {
+                var showtimeDto = _mapper.Map<ShowTimeDto>(showTime);
+                return showtimeDto;
+            }
+            return null;
+        }
 
-        
     }
 }

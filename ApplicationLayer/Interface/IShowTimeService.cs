@@ -12,5 +12,6 @@ namespace ApplicationLayer.Interface
         public Task<ShowTimeDataDto> GetShowTimeData();
 
         public Task<List<ShowTimeDto>> GetShowTimeDataIncludMoiveAndTheater();
+        public Task<ShowTimeDto> GetById(Guid Id);
     }
 }
